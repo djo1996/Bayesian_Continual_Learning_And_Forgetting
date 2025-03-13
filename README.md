@@ -28,7 +28,10 @@ After downloading, place them in the `datasets/` folder before running the scrip
 
 ## Figure CIFAR
 
-With clear boundary, correspond to number of splits = 1 in Figure 5 
+### Clear task boundary
+This corresponds to the case where the number of splits is 1, as shown in Figure 5. This experiment was conducted to determine the optimal hyperparameters for each algorithm.
+
+Before running the command, ensure that you create the repository where you want to store the results. Replace "YOUR_DIRECTORY" with your desired path.
 
 MESU
 ```bash
@@ -108,3 +111,23 @@ python3 -u main.py \
     --lambda=5 \
     --torch_optim_name='Adam'  
 ```
+Baseline
+
+python3 -u main.py \
+    --learning_scenario='Task incremental' \
+    --dataset="CIFAR110"  \
+    --algo='DET' \
+    --result_dir="YOUR_REPO" \
+    --argfile="arguments_simu.txt" \
+    --boundary="Clear" \
+    --batch_size=200 \
+    --batch_size_inf=200 \
+    --train_epochs_A=60 \
+    --train_epochs_B=60 \
+    --activation='Relu'  \
+    --reduction='mean' \
+    --random_seed=10 \
+    --num_heads=11 \
+    --num_classes=10 \
+    --lr=0.001 \
+    --torch_optim_name='Adam'

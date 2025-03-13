@@ -135,7 +135,7 @@ python3 -u main.py \
     --torch_optim_name='Adam'
 ```
 
-### Unlear task boundary
+### Unclear task boundary
 This is the command to run in order to obtain results for cases where the number of splits is greater than 1—i.e., the case of an unclear boundary.
 
 All hyperparameters must remain the same as in the previous experiment. As you can see, the only change is modifying the "boundary" argument from "Clear" to "Unclear", while selecting the desired number of seasons (number of splits).

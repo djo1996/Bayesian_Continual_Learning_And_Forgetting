@@ -134,3 +134,35 @@ python3 -u main.py \
     --lr=0.001 \
     --torch_optim_name='Adam'
 ```
+
+### Unlear task boundary
+
+This is the command to be run to get results for number of splits  greater than 1, ie the case of unclear boundary (this correspond to the argument "season" bellow). All the hyperparameters must be the same as above. As you can see you just change the argument boundary from "Clear' to 'Unclear" and chose the number of season that you desired. Again before running the command, ensure that you create the repository where you want to store the results. Replace "YOUR_DIRECTORY" with your desired path.
+```bash
+python3 -u main.py \
+    --learning_scenario='Task incremental' \
+    --dataset="$DATASET"  \
+    --algo='MESU' \
+    --result_dir="$RESULT_DIR/MESU/simu1" \
+    --argfile="arguments_simu.txt" \
+    --boundary="Unclear" \
+    --seasons=2 \
+    --batch_size=200 \
+    --batch_size_inf=200 \
+    --train_epochs_A=60 \
+    --train_epochs_B=60 \
+    --activation='Relu'  \
+    --reduction='sum' \
+    --random_seed=10 \
+    --num_heads=11 \
+    --num_classes=10 \
+    --moy_over=1 \
+    --samples_train=8 \
+    --samples_inf=8 \
+    --c_sigma=132 \
+    --N=1e6 \
+    --c_mu=5  \
+    --sigma_prior=1 \
+    --clamp_sigma 1e-6 1 \
+    --ratio_max=0.02 
+```

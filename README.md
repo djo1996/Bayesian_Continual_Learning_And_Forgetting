@@ -63,7 +63,7 @@ python3 -u main.py \
 ```
 
 
-#### EWC
+#### Elastic Weight Consolidation 
 ```bibtex
 @article{kirkpatrick2017overcoming,
   title={Overcoming catastrophic forgetting in neural networks},
@@ -75,7 +75,7 @@ python3 -u main.py \
   year={2017},
   publisher={National Academy of Sciences}
 }
-
+```
 ```bash
 python3 -u main.py \
     --learning_scenario='Task incremental' \
@@ -99,8 +99,17 @@ python3 -u main.py \
     --torch_optim_name='Adam' 
 ```
 
-SI
-
+#### Synaptic intelligence
+```bibtex
+@inproceedings{zenke2017continual,
+  title={Continual learning through synaptic intelligence},
+  author={Zenke, Friedemann and Poole, Ben and Ganguli, Surya},
+  booktitle={International conference on machine learning},
+  pages={3987--3995},
+  year={2017},
+  organization={PMLR}
+}
+```
 ```bash
 python3 -u main.py \
     --learning_scenario='Task incremental' \
@@ -122,7 +131,7 @@ python3 -u main.py \
     --lambda=5 \
     --torch_optim_name='Adam'  
 ```
-Baseline
+#### Baseline
 
 
 ```bash

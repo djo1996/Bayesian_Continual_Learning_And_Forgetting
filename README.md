@@ -64,7 +64,7 @@ python3 -u main.py \
 
 
 #### EWC
-
+```bibtex
 @article{kirkpatrick2017overcoming,
   title={Overcoming catastrophic forgetting in neural networks},
   author={Kirkpatrick, James and Pascanu, Razvan and Rabinowitz, Neil and Veness, Joel and Desjardins, Guillaume and Rusu, Andrei A and Milan, Kieran and Quan, John and Ramalho, Tiago and Grabska-Barwinska, Agnieszka and others},

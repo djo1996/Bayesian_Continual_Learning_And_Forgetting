@@ -33,7 +33,7 @@ This corresponds to the case where the number of splits is 1, as shown in Figure
 
 Before running the command, ensure that you create the repository where you want to store the results. Replace "YOUR_DIRECTORY" with your desired path.
 
-MESU
+#### MESU
 ```bash
 python3 -u main.py \
     --learning_scenario='Task incremental' \
@@ -63,7 +63,18 @@ python3 -u main.py \
 ```
 
 
-EWC
+#### EWC
+
+@article{kirkpatrick2017overcoming,
+  title={Overcoming catastrophic forgetting in neural networks},
+  author={Kirkpatrick, James and Pascanu, Razvan and Rabinowitz, Neil and Veness, Joel and Desjardins, Guillaume and Rusu, Andrei A and Milan, Kieran and Quan, John and Ramalho, Tiago and Grabska-Barwinska, Agnieszka and others},
+  journal={Proceedings of the national academy of sciences},
+  volume={114},
+  number={13},
+  pages={3521--3526},
+  year={2017},
+  publisher={National Academy of Sciences}
+}
 
 ```bash
 python3 -u main.py \

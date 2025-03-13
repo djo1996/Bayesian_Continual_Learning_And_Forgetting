@@ -136,8 +136,11 @@ python3 -u main.py \
 ```
 
 ### Unlear task boundary
+This is the command to run in order to obtain results for cases where the number of splits is greater than 1—i.e., the case of an unclear boundary.
 
-This is the command to be run to get results for number of splits  greater than 1, ie the case of unclear boundary (this correspond to the argument "season" bellow). All the hyperparameters must be the same as above. As you can see you just change the argument boundary from "Clear' to 'Unclear" and chose the number of season that you desired. Again before running the command, ensure that you create the repository where you want to store the results. Replace "YOUR_DIRECTORY" with your desired path.
+All hyperparameters must remain the same as in the previous experiment. As you can see, the only change is modifying the "boundary" argument from "Clear" to "Unclear", while selecting the desired number of seasons (number of splits).
+
+Before running the command, ensure that you create the repository where you want to store the results. Replace "YOUR_DIRECTORY" with your desired path.
 ```bash
 python3 -u main.py \
     --learning_scenario='Task incremental' \

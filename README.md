@@ -113,6 +113,8 @@ python3 -u main.py \
 ```
 Baseline
 
+
+```bash
 python3 -u main.py \
     --learning_scenario='Task incremental' \
     --dataset="CIFAR110"  \
@@ -131,3 +133,4 @@ python3 -u main.py \
     --num_classes=10 \
     --lr=0.001 \
     --torch_optim_name='Adam'
+```

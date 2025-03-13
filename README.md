@@ -169,3 +169,16 @@ python3 -u main.py \
     --clamp_sigma 1e-6 1 \
     --ratio_max=0.02 
 ```
+
+## Authors
+
+- [Djohan BONNET](https://scholar.google.com/citations?user=1cSwOPIAAAAJ&hl=en)
+- [Kellian COTTART](https://scholar.google.com/citations?hl=en&user=Akg-AH4AAAAJ)
+
+## Citation
+
+Please reference this work as
+
+## License
+
+This project is licensed under the CC-BY License - see the [LICENSE](LICENSE) file for details.

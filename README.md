@@ -9,7 +9,7 @@ To set up your environment, run the following commands:
 ```bash
 python3 -m venv mesu
 source mesu/bin/activate
-
+git clone https://github.com/djo1996/Bayesian_Continual_Learning_And_Forgetting.git
 pip3 install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu118
 pip install tqdm
 pip install matplotlib

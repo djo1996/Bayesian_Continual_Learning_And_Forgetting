@@ -31,9 +31,6 @@ default_transforms = transforms.Compose([
     transforms.Resize((224, 224)),
     transforms.ToTensor(),
     transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229,0.224,0.225]),
-    transforms.RandomHorizontalFlip(0.5),
-    transforms.RandomVerticalFlip(0.5),
-    transforms.RandomRotation(degrees=30),
 ])
 
 def get_dataset(data_path, transform=default_transforms):
@@ -74,25 +71,15 @@ def inv_normalize1(batch_image, mean, std):
 
  
 class CNN(nn.Module):
-    """
-    Convolutional neural network used for classic learning on CIFAR10. 
-    Same architecture as in F. Zenke "Continual Learning Through Synaptic Intelligence" (2017).
-    """
     def __init__(self, ):
         super(CNN, self).__init__()
         weights = ResNet18_Weights
         self.efficientnet = resnet18(weights=weights,progress=False).eval() 
         self.transform_train = transforms.Compose([
-        transforms.RandomHorizontalFlip(0.5),
-        transforms.RandomRotation(degrees=15),
     ])
         modules = list(self.efficientnet.children())[:-1]  # delete the last fc layer and conv layer
         self.efficientnet = nn.Sequential(*modules)
     def forward(self, x):
-        """ 
-        Forward pass through the network. 
-        If in training mode we apply a random horizontal flip to the input
-        """
         CNN.eval()
         with torch.no_grad():
             x = self.efficientnet(x)  
@@ -156,11 +143,7 @@ np.savez('domain_inc_animals_train_4',X=X_train,Y=Y_train)
 
     
 data_path = "../datasets/ANIMALS_FINAL/Test"
-default_transforms = transforms.Compose([
-    transforms.Resize((224, 224)),
-    transforms.ToTensor(),
-    transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229,0.224,0.225]),
-])
+
 
 ds = get_dataset(data_path, default_transforms)
 train_loader, test_loader = get_dataloaders(ds, [1,  0.], batch_size= 181)

@@ -166,7 +166,9 @@ python3 -u main.py --learning_scenario='Classic' --dataset='MNIST'  --algo='DET'
 python3 -u main.py --learning_scenario='Classic' --dataset='MNIST'  --algo='DET' --result_dir="YOUR_DIRECTORY" --argfile="arguments_simu.txt" --batch_size=32 --batch_size_inf=6000 --train_epochs=200 --samples_train=3 --samples_inf=10 --activation='Relu' --L 1e3 1e4 1e5 1e6  --archi_fcnn 784 50 10  --hessian_approx='SI' --input_transformation='standardize' --moy_over=3 --reduction='sum' --lr=0.0001
 ```
 
+## Figure 3 and Figure 4
 
+To reproduce the results of figure 3 and 4 check out the JAX implementaion we made in this other [github](https://github.com/kellian-cottart/mesu-pmnist.git).
 
 ## Authors
 

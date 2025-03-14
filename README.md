@@ -24,8 +24,17 @@ The CIFAR/MNIST training datasets are too large for GitHub. You can download the
 
 After downloading, place them in the `datasets/` folder before running the scripts.
 
-
-
+## Figure Animals
+This is the commands to run in order to obtain results of Figure2.
+Before running the command, ensure that you create the repository where you want to store the results. Replace "YOUR_DIRECTORY" with your desired path. (Choose a different one for each simulation)
+#### MESU
+```bash
+python3 -u main.py --learning_scenario='Domain incremental'  --dataset='ANIMALS'  --algo='MESU' --result_dir="YOUR_DIRECTORY" --argfile="arguments_simu.txt" --batch_size=1 --batch_size_inf=32 --train_epochs=5 --samples_train=10 --samples_inf=100 --activation='Relu' --clamp_grad=0.0 --archi_fcnn 512 64 5 --N=5e5  --reduction='mean' --coeff_likeli=1 --random_seed=1  --c_sigma=60 --sigma_prior=0.1  --ratio_max=0.5 --c_mu=1 --clamp_sigma 1e-4 0.1 --moy_over=50
+```
+#### SGD
+```bash
+python3 -u main.py --learning_scenario='Domain incremental'  --dataset='ANIMALS'  --algo='DET' --result_dir="YOUR_DIRECTORY" --argfile="arguments_simu.txt" --batch_size=1 --batch_size_inf=32 --train_epochs=5 --activation='Relu'  --archi_fcnn 512 64 5  --reduction='mean' --coeff_likeli=1 --random_seed=1   --moy_over=50 --torch_optim_name='SGD' --lr=0.005
+```
 ## Figure CIFAR
 
 This is the commands to run in order to obtain results for clear task boundary.
@@ -50,7 +59,7 @@ python3 -u main.py --learning_scenario='Task incremental' --dataset="CIFAR110" -
 python3 -u main.py --learning_scenario='Task incremental' --dataset="CIFAR110" --algo='MESU' --result_dir="YOUR_DIRECTORY" --argfile="arguments_simu.txt" --boundary="Unclear" --seasons=8 --batch_size=200 --batch_size_inf=200 --train_epochs_A=60 --train_epochs_B=60 --activation='Relu' --reduction='sum' --random_seed=10 --num_heads=11 --num_classes=10 --moy_over=1 --samples_train=8 --samples_inf=8 --c_sigma=132 --N=1e6 --c_mu=5 --sigma_prior=1 --clamp_sigma 1e-6 1 --ratio_max=0.02
 ```
 ```bash
-python3 -u main.py --learning_scenario='Task incremental' --dataset="CIFAR110" --algo='MESU' --result_dir="YOUR_DIRECTORY" --argfile="arguments_simu.txt" --boundary="Unclear" --seasons=16 --batch_size=200 --batch_size_inf=200 --train_epochs_A=60 --train_epochs_B=60 --activation='Relu' --reduction='sum' --random_seed=10 --num_heads=11 --num_classes=10 --moy_over=1 --samples_train=8 --samples_inf=8 --c_sigma=132 --N=1e6 --c_mu=5 --sigma_prior=1 --clamp_sigma 1e-6 1 --ratio_max=0.02
+python3 -u main.py --learning_scenario='Task incremental' --dataset="CIFAR110" --algo='MESU' --result_dir="YOUR_DIRECTORY" --argfile="arguments_simu.txt" --boundary="Unclear" --seasons=16 --batch_size=200 --batch_size_inf=200 --train_epochs_A=60 --train_epochs_B=60 --activation='Relu' --reduction='sum' --random_seed=10 --num_heads=11 --num_classes=10 --moy_over=1 --samples_train=8 --samples_inf=8 --c_sigma=132 --N=1e6 --c_mu=5 --sigma_prior=1 --clamp_sigma 1e-6 1 --ratio_max=0.02 
 ```
 
 #### Elastic Weight Consolidation 

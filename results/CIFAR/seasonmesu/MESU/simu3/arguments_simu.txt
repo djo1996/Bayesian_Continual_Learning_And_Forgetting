@@ -1,0 +1,56 @@
+learning_scenario: Task incremental
+dataset: CIFAR110
+input_transformation: None
+shift: 0
+scale: 1
+discretize_levels: 0
+result_dir: results_new/cifar11020250217_112317/MESU/simu3
+argfile: arguments_simu.txt
+random_seed: 10
+moy_over: 1
+hessian_approx: None
+parameter_search: None
+boundary: Unclear
+seasons: 8
+train_epochs: 5
+batch_size: 200
+batch_size_fisher: 1
+batch_size_inf: 200
+samples_train: 8
+samples_inf: 8
+reduction: sum
+algo: MESU
+cnn_mixte: 0
+num_classes: 10
+num_heads: 11
+archi_fcnn: [784, 512, 10]
+elephant_params: [1, 2]
+activation: Relu
+cnn_sampling: weights
+lambda: 50
+coeff_likeli: 1
+coeff_kl: 1
+lr: 0.001
+weight_decay: 0.0
+torch_optim_name: SGD
+clamp_grad: 0
+c_mu: 5.0
+c_sigma: 66.0
+second_order: 0
+clamp_mu: [0, 0]
+clamp_sigma: [1e-06, 1.0]
+sigma_init: 0.1
+sigma_init_conv: 0.1
+sigma_prior: 1.0
+mu_prior: 0.0
+N: 500000.0
+ratio_max: 0.02
+moment_sigma: 0.0
+moment_mu: 0.0
+num_task: 51
+ratio: 0.99
+train_epochs_A: 60
+train_epochs_B: 60
+L: [1000.0, 10000.0, 100000.0, 1000000.0]
+L_cmu: [0.1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+L_ratio_max: [0.2, 0.1, 0.05, 0.02, 0.01, 0.005, 0.002, 0.001]

@@ -1,0 +1,52 @@
+learning_scenario: Classic
+dataset: MNIST
+input_transformation: standardize
+shift: 0
+scale: 1
+discretize_levels: 0
+result_dir: results/RESULT_APPROX_20241030_114951/simu4
+argfile: arguments_simu.txt
+random_seed: 7
+moy_over: 3
+hessian_approx: MetaBayes
+parameter_search: None
+train_epochs: 1000
+batch_size: 32
+batch_size_inf: 6000
+samples_train: 20
+samples_inf: 20
+reduction: sum
+algo: BGD
+cnn_mixte: 0
+num_classes: 10
+num_heads: 0
+archi_fcnn: [784, 50, 10]
+elephant_params: [1, 2]
+activation: Relu
+cnn_sampling: weights
+coeff_likeli: 1.0
+coeff_kl: 1
+lr: 0.001
+weight_decay: 0.0
+torch_optim_name: SGD
+clamp_grad: 0
+c_mu: 1
+c_sigma: 1
+second_order: 0
+clamp_mu: [0, 0]
+clamp_sigma: [0, 0]
+sigma_init: 0.1
+sigma_init_conv: 0.03162277660168379
+sigma_prior: 1.0
+mu_prior: 0.0
+N: 300000.0
+ratio_max: 0.05
+moment_sigma: 0.0
+moment_mu: 0.0
+num_task: 51
+ratio: 0.99
+train_epochs_task_A: 5
+train_epochs_task_B: 1
+L: [1000.0, 10000.0, 100000.0, 1000000.0]
+L_cmu: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+L_ratio_max: [0.2, 0.1, 0.05, 0.02, 0.01, 0.005, 0.002, 0.001]

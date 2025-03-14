@@ -35,31 +35,8 @@ Before running the command, ensure that you create the repository where you want
 
 #### MESU
 ```bash
-python3 -u main.py \
-    --learning_scenario='Task incremental' \
-    --dataset="CIFAR110"  \
-    --algo='MESU' \
-    --result_dir="YOUR_DIRECTORY" \
-    --argfile="arguments_simu.txt" \
-    --boundary="Clear" \
-    --batch_size=200 \
-    --batch_size_inf=200 \
-    --train_epochs_A=60 \
-    --train_epochs_B=60 \
-    --activation='Relu'  \
-    --reduction='sum' \
-    --random_seed=10 \
-    --num_heads=11 \
-    --num_classes=10 \
-    --moy_over=1 \
-    --samples_train=8 \
-    --samples_inf=8 \
-    --c_sigma=132 \
-    --N=1e6 \
-    --c_mu=5  \
-    --sigma_prior=1 \
-    --clamp_sigma 1e-6 1 \
-    --ratio_max=0.02
+python3 -u main.py --learning_scenario='Task incremental' --dataset="CIFAR110" --algo='MESU' --result_dir="YOUR_DIRECTORY" --argfile="arguments_simu.txt" --boundary="Clear" --batch_size=200 --batch_size_inf=200 --train_epochs_A=60 --train_epochs_B=60 --activation='Relu' --reduction='sum' --random_seed=10 --num_heads=11 --num_classes=10 --moy_over=1 --samples_train=8 --samples_inf=8 --c_sigma=132 --N=1e6 --c_mu=5 --sigma_prior=1 --clamp_sigma 1e-6 1 --ratio_max=0.02
+
 ```
 
 
@@ -77,26 +54,8 @@ python3 -u main.py \
 }
 ```
 ```bash
-python3 -u main.py \
-    --learning_scenario='Task incremental' \
-    --dataset="CIFAR110"  \
-    --algo='EWC' \
-    --result_dir="YOUR_DIRECTORY" \
-    --argfile="arguments_simu.txt" \
-    --boundary="Clear" \
-    --batch_size=200 \
-    --batch_size_inf=200 \
-    --batch_size_fisher=1 \
-    --train_epochs_A=60 \
-    --train_epochs_B=60 \
-    --activation='Relu'  \
-    --reduction='mean' \
-    --random_seed=10 \
-    --num_heads=11 \
-    --num_classes=10 \
-    --lr=0.001 \
-    --lambda=5 \
-    --torch_optim_name='Adam' 
+python3 -u main.py --learning_scenario='Task incremental' --dataset="CIFAR110" --algo='EWC' --result_dir="YOUR_DIRECTORY" --argfile="arguments_simu.txt" --boundary="Clear" --batch_size=200 --batch_size_inf=200 --batch_size_fisher=1 --train_epochs_A=60 --train_epochs_B=60 --activation='Relu' --reduction='mean' --random_seed=10 --num_heads=11 --num_classes=10 --lr=0.001 --lambda=5 --torch_optim_name='Adam'
+
 ```
 
 #### Synaptic intelligence
@@ -135,24 +94,8 @@ python3 -u main.py \
 
 
 ```bash
-python3 -u main.py \
-    --learning_scenario='Task incremental' \
-    --dataset="CIFAR110"  \
-    --algo='DET' \
-    --result_dir="YOUR_REPO" \
-    --argfile="arguments_simu.txt" \
-    --boundary="Clear" \
-    --batch_size=200 \
-    --batch_size_inf=200 \
-    --train_epochs_A=60 \
-    --train_epochs_B=60 \
-    --activation='Relu'  \
-    --reduction='mean' \
-    --random_seed=10 \
-    --num_heads=11 \
-    --num_classes=10 \
-    --lr=0.001 \
-    --torch_optim_name='Adam'
+python3 -u main.py --learning_scenario='Task incremental' --dataset="CIFAR110" --algo='SI' --result_dir="$RESULT_DIR/SI" --argfile="arguments_simu.txt" --boundary="Clear" --batch_size=200 --batch_size_inf=200 --train_epochs_A=60 --train_epochs_B=60 --activation='Relu' --reduction='mean' --random_seed=10 --num_heads=11 --num_classes=10 --lr=0.001 --lambda=5 --torch_optim_name='Adam'
+
 ```
 
 ### Unclear task boundary

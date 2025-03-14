@@ -432,6 +432,7 @@ class FCNN_DET(nn.Module):
         
         archi_fcnn=args_dict['archi_fcnn']
         a,d=args_dict['elephant_params']
+        self.num_classes = args_dict['num_classes']
         activation=args_dict['activation']
         self.coeff_likeli=args_dict['coeff_likeli']
         self.num_out = archi_fcnn[-1]
@@ -442,9 +443,6 @@ class FCNN_DET(nn.Module):
         valid_activations = {'Tanh', 'Relu',  'Hardtanh'}
         if activation not in valid_activations:
             raise ValueError("Invalid activation name {!r}, should be one of {}".format(activation, valid_activations))
-        # self.num_classes=5
-        # self.target=nn.Parameter(torch.randn(3,archi_fcnn[-1],self.num_classes))
-        # self.task=0
         if activation == 'Tanh':
             self.act = torch.nn.Tanh()
         elif activation == 'Hardtanh':
@@ -470,7 +468,6 @@ class FCNN_DET(nn.Module):
             x = layer(x)
             x = self.act(x)
         x = self.layers[-1](x)
-        # dist = torch.mean(((x[:,:,None]-self.target[self.task][None])**2),axis=1)
         pred = F.log_softmax(x, dim=1)
         return pred
     

@@ -66,6 +66,7 @@ parser.add_argument('--num_classes', type=int, default=10, help='Number of class
 parser.add_argument('--num_heads', type=int, default=0, help='Number of head in the DNN')
 parser.add_argument('--archi_fcnn', type=int, nargs='+', default=[784, 512, 10], help='Fully connected layer architecture')
 parser.add_argument('--elephant_params', type=float, nargs='+', default=[1, 2], help='Elephant parameters')
+
 parser.add_argument('--activation', type=str, default='Relu', help='Activation function')
 parser.add_argument('--cnn_sampling', type=str, default='weights', help='Sampling strategy: weights or neurons')
 
@@ -123,21 +124,20 @@ from dataloader import DataLoader
 from trainer import Trainer
 import utils     
     
-# Define the right model and optimizer for the experiment
-model,optimizer = utils.select_model_and_optim(vars(args))
-DL = DataLoader(vars(args))
-X_train=DL.X_train
-X_test=DL.X_test
-Y_train=DL.Y_train
-Y_test=DL.Y_test
 
-# Define the right Trainer
-TR = Trainer(args.learning_scenario, args.algo, optimizer, model, clamp_grad=args.clamp_grad)
 
-    
  
 # USED FOR FIGURE 5   
 if args.learning_scenario == 'Task incremental' and args.dataset=='CIFAR110' and args.boundary=="Clear":
+    # Define the right model and optimizer for the experiment
+    model,optimizer = utils.select_model_and_optim(vars(args))
+    DL = DataLoader(vars(args))
+    X_train=DL.X_train
+    X_test=DL.X_test
+    Y_train=DL.Y_train
+    Y_test=DL.Y_test  
+    # Define the right Trainer
+    TR = Trainer(args.learning_scenario, args.algo, optimizer, model, clamp_grad=args.clamp_grad) 
     Acc_train=[]
     Acc_test=[]
     with tqdm(total=args.train_epochs_A + args.train_epochs_B*(args.num_heads-1), desc='Training Progress', unit='epoch') as pbar:
@@ -190,6 +190,15 @@ if args.learning_scenario == 'Task incremental' and args.dataset=='CIFAR110' and
 if args.learning_scenario == 'Task incremental' and args.dataset=='CIFAR110' and args.boundary=="Unclear":
     Acc_train=[]
     Acc_test=[]
+    # Define the right model and optimizer for the experiment
+    model,optimizer = utils.select_model_and_optim(vars(args))
+    DL = DataLoader(vars(args))
+    X_train=DL.X_train
+    X_test=DL.X_test
+    Y_train=DL.Y_train
+    Y_test=DL.Y_test
+    # Define the right Trainer
+    TR = Trainer(args.learning_scenario, args.algo, optimizer, model, clamp_grad=args.clamp_grad) 
     numberOfiterations=args.seasons*args.train_epochs_A + args.seasons*args.train_epochs_B*(args.num_heads-1)
     with tqdm(total=numberOfiterations, desc='Training Progress', unit='epoch') as pbar:
         for season in range(args.seasons):
@@ -266,7 +275,7 @@ if args.learning_scenario == 'Domain incremental' and args.dataset=='ANIMALS':
                  for epoch in range(args.train_epochs):
                      order=np.random.permutation(len(X_train[mod]))
             
-                     loss = TR.train(X_train[mod], Y_train[mod], batch_size=args.batch_size, samples_train=args.samples_train)
+                     loss = TR.train(X_train[mod][order], Y_train[mod][order], batch_size=args.batch_size, samples_train=args.samples_train)
                      acc1 = TR.Eval(X_test[0], Y_test[0], batch_size=args.batch_size_inf, samples_inf=args.samples_inf)
                      acc2 = TR.Eval(X_test[1], Y_test[1], batch_size=args.batch_size_inf, samples_inf=args.samples_inf)
                      acc3 = TR.Eval(X_test[2], Y_test[2], batch_size=args.batch_size_inf, samples_inf=args.samples_inf)

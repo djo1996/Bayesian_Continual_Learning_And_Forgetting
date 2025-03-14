@@ -65,6 +65,7 @@ parser.add_argument('--cnn_mixte', type=int, default=0, help='Full bayesian or b
 parser.add_argument('--num_classes', type=int, default=10, help='Number of classes we have to classify')
 parser.add_argument('--num_heads', type=int, default=0, help='Number of head in the DNN')
 parser.add_argument('--archi_fcnn', type=int, nargs='+', default=[784, 512, 10], help='Fully connected layer architecture')
+parser.add_argument('--elephant_params', type=float, nargs='+', default=[1, 2], help='Elephant parameters')
 parser.add_argument('--activation', type=str, default='Relu', help='Activation function')
 parser.add_argument('--cnn_sampling', type=str, default='weights', help='Sampling strategy: weights or neurons')
 

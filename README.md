@@ -29,11 +29,11 @@ This is the commands to run in order to obtain results of Figure 2.
 Before running the command, ensure that you create the repository where you want to store the results. Replace "YOUR_DIRECTORY" with your desired path. (Choose a different one for each simulation)
 ### MESU
 ```bash
-python3 -u main.py --learning_scenario='Domain incremental'  --dataset='ANIMALS'  --algo='MESU' --result_dir="YOUR_DIRECTORY" --argfile="arguments_simu.txt" --batch_size=1 --batch_size_inf=32 --train_epochs=5 --samples_train=10 --samples_inf=100 --activation='Relu' --clamp_grad=0.0 --archi_fcnn 512 64 5 --N=5e5  --reduction='mean' --coeff_likeli=1 --random_seed=1  --c_sigma=60 --sigma_prior=0.1  --ratio_max=0.5 --c_mu=1 --clamp_sigma 1e-4 0.1 --moy_over=50
+python3 -u main.py --learning_scenario='Domain incremental'  --dataset='ANIMALS'  --algo='MESU' --result_dir="YOUR_DIRECTORY" --argfile="arguments_simu.txt" --batch_size=1 --batch_size_inf=32 --train_epochs=5 --samples_train=10 --samples_inf=100 --activation='Relu' --clamp_grad=0.0 --archi_fcnn 512 64 5 --N=5e5  --reduction='mean' --coeff_likeli=1 --random_seed=1  --c_sigma=60 --sigma_prior=0.1  --ratio_max=0.5 --c_mu=1 --clamp_sigma 1e-4 0.1 --moy_over=50 --num_classes=5
 ```
 ### SGD
 ```bash
-python3 -u main.py --learning_scenario='Domain incremental'  --dataset='ANIMALS'  --algo='DET' --result_dir="YOUR_DIRECTORY" --argfile="arguments_simu.txt" --batch_size=1 --batch_size_inf=32 --train_epochs=5 --activation='Relu'  --archi_fcnn 512 64 5  --reduction='mean' --coeff_likeli=1 --random_seed=1   --moy_over=50 --torch_optim_name='SGD' --lr=0.005
+python3 -u main.py --learning_scenario='Domain incremental'  --dataset='ANIMALS'  --algo='DET' --result_dir="YOUR_DIRECTORY" --argfile="arguments_simu.txt" --batch_size=1 --batch_size_inf=32 --train_epochs=5 --activation='Relu'  --archi_fcnn 512 64 5  --reduction='mean' --coeff_likeli=1 --random_seed=1   --moy_over=50 --torch_optim_name='SGD' --lr=0.005 --num_classes=5
 ```
 ## Figure CIFAR
 

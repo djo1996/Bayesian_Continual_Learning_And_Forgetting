@@ -335,12 +335,6 @@ class Trainer(object):
         
         for batch_idx in range(num_batches):
             
-            
-            # 1. Save current parameters
-            # old_params = {}
-            # for idx, p in enumerate(self.model.parameters()):
-            #     old_params[idx] = p.clone().detach()
-
             old_params = {}
             for i, (name, param) in enumerate(self.model.named_parameters(recurse=True)):
                 old_params[name] = param.clone().detach()

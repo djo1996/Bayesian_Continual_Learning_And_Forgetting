@@ -26,6 +26,8 @@ from torch.nn.common_types import _size_2_t
 from typing import Optional, List, Tuple, Union
 import numpy as np
 
+# NOT USED IN THE MAIN ARTICLE, THIS IS TO IMPLEMENT BAYES BY BACKPROP
+# I LEAVE IT HERE IN CASE SOMEONE IS INTERESTED
 
 
 # Check if CUDA is available

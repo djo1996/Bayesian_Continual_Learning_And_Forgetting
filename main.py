@@ -65,7 +65,6 @@ parser.add_argument('--cnn_mixte', type=int, default=0, help='Full bayesian or b
 parser.add_argument('--num_classes', type=int, default=10, help='Number of classes we have to classify')
 parser.add_argument('--num_heads', type=int, default=0, help='Number of head in the DNN')
 parser.add_argument('--archi_fcnn', type=int, nargs='+', default=[784, 512, 10], help='Fully connected layer architecture')
-parser.add_argument('--elephant_params', type=float, nargs='+', default=[1, 2], help='Elephant parameters')
 parser.add_argument('--activation', type=str, default='Relu', help='Activation function')
 parser.add_argument('--cnn_sampling', type=str, default='weights', help='Sampling strategy: weights or neurons')
 
@@ -93,20 +92,18 @@ parser.add_argument('--sigma_prior', type=float, default=0.06, help='Prior stand
 parser.add_argument('--mu_prior', type=float, default=0.0, help='Prior mean (MESU, BBB_GP)')
 parser.add_argument('--N', type=float, default=1e6, help='Number of batches to retain for sigma')
 parser.add_argument('--ratio_max', type=float, default=0.1, help='Maximum value of delta_sigma/sigma or delta_mu/sigma')
-parser.add_argument('--moment_sigma', type=float, default=0., help='Maximum value of delta_sigma/sigma or delta_mu/sigma')
-parser.add_argument('--moment_mu', type=float, default=0., help='Maximum value of delta_sigma/sigma or delta_mu/sigma')
+parser.add_argument('--moment_sigma', type=float, default=0., help='If you want to add some momentum, not used in the paper')
+parser.add_argument('--moment_mu', type=float, default=0., help='If you want to add some momentum, not used in the paper')
 
 # Task parameters
 parser.add_argument('--num_task', type=int, default=51, help='Number of permutations for Permuted MNIST')
 parser.add_argument('--ratio', type=float, default=0.99, help='Gradual addition of images from new tasks')
-parser.add_argument('--train_epochs_A', type=int, default=5, help='Training epochs for first task in Split CIFAR10')
-parser.add_argument('--train_epochs_B', type=int, default=1, help='Training epochs for second task in Split CIFAR10')
+parser.add_argument('--train_epochs_A', type=int, default=5, help='Training epochs for first task in Split CIFAR110')
+parser.add_argument('--train_epochs_B', type=int, default=1, help='Training epochs for the other tasks in Split CIFAR110')
 
 # Additional parameters for Hessian diagonal approximation
 parser.add_argument('--L', type=float, nargs='+', default=[1e3, 1e4, 1e5, 1e6], help='Hessian diagonal approximation levels')
-# parser.add_argument('--L_cmu', type=float, nargs='+', default=[0.01, 0.02, 0.03, 0.04, 0.05, 0.06, 0.07, 0.08 , 0.09, 0.1], help='Accelaration mu update')
-parser.add_argument('--L_cmu', type=float, nargs='+', default=[0.1,2,3,4,5,6,7,8,9,10], help='coeff mu update')
-parser.add_argument('--L_ratio_max', type=float, nargs='+', default=[0.2,0.1,0.05,0.02,0.01,0.005,0.002,0.001], help='Prior standard deviation (MESU, BBB_GP)')
+
 
 # Parse the arguments
 args = parser.parse_args()
@@ -136,70 +133,9 @@ Y_test=DL.Y_test
 # Define the right Trainer
 TR = Trainer(args.learning_scenario, args.algo, optimizer, model, clamp_grad=args.clamp_grad)
 
-if args.learning_scenario == 'Task incremental' and args.dataset=='CIFAR10':
-    Acc_train=[]
-    Acc_test1=[]
-    Acc_test2=[]
-    with tqdm(total=args.train_epochs_task_A, desc='Training Progress task A', unit='epoch') as pbar:
-            for epoch in range(args.train_epochs_task_A):
-    
-                order = np.random.permutation(len(X_train))
-                X_train=X_train[order]
-                Y_train=Y_train[order]
-                start_time = time.time()
-                loss=TR.train_task_inc(X_train[Y_train<5],Y_train[Y_train<5],head=0, batch_size=args.batch_size, samples_train=args.samples_train)
-                acc_train=TR.eval_task_inc(X_train[Y_train<5],Y_train[Y_train<5],head=0, batch_size=args.batch_size_inf, samples_inf=args.samples_inf)
-                acc_test1=TR.eval_task_inc(X_test[Y_test<5],Y_test[Y_test<5],head=0, batch_size=args.batch_size_inf, samples_inf=args.samples_inf)
-                acc_test2=TR.eval_task_inc(X_test[Y_test>4],Y_test[Y_test>4]-5,head=1, batch_size=args.batch_size_inf, samples_inf=args.samples_inf)
-                Acc_train.append(acc_train)
-                Acc_test1.append(acc_test1)
-                Acc_test2.append(acc_test2)
-                end_time = time.time()
-                duration = end_time - start_time
-                duration = round(duration,2)
-                pbar.set_postfix({
-                    'acc_train': f'{acc_train:.2f}', 
-                    'acc_test1': f'{acc_test1:.2f}',
-                    'acc_test2': f'{acc_test2:.2f}',
-                    'duration': f'{duration:.2f}s'
-                })
-    
-                pbar.update(1)
-        
-    torch.save(model.state_dict(), args.result_dir+'/model_task_A.pth')
-    with tqdm(total=args.train_epochs_task_B, desc='Training Progress Task B', unit='epoch') as pbar:
-            for epoch in range(args.train_epochs_task_B):
-    
-                order = np.random.permutation(len(X_train))
-                X_train=X_train[order]
-                Y_train=Y_train[order]
-                start_time = time.time()
-                loss=TR.train_task_inc(X_train[Y_train>4],Y_train[Y_train>4]-5, head=1, batch_size=args.batch_size, samples_train=args.samples_train)
-                acc_train=TR.eval_task_inc(X_train[Y_train>4],Y_train[Y_train>4]-5, head=1, batch_size=args.batch_size_inf, samples_inf=args.samples_inf)
-                acc_test1=TR.eval_task_inc(X_test[Y_test<5],Y_test[Y_test<5],head=0, batch_size=args.batch_size_inf, samples_inf=args.samples_inf)
-                acc_test2=TR.eval_task_inc(X_test[Y_test>4],Y_test[Y_test>4]-5,head=1, batch_size=args.batch_size_inf, samples_inf=args.samples_inf)
-                Acc_train.append(acc_train)
-                Acc_test1.append(acc_test1)
-                Acc_test2.append(acc_test2)
-                end_time = time.time()
-                duration = end_time - start_time
-                duration = round(duration,2)
-                pbar.set_postfix({
-                    'acc_train': f'{acc_train:.2f}', 
-                    'acc_test1': f'{acc_test1:.2f}',
-                    'acc_test2': f'{acc_test2:.2f}',
-                    'duration': f'{duration:.2f}s'
-                })
-    
-                pbar.update(1)
-                
-    np.savetxt(args.result_dir+'/acc_train',Acc_train)
-    np.savetxt(args.result_dir+'/acc_test1',Acc_test1)
-    np.savetxt(args.result_dir+'/acc_test2',Acc_test2)
-    torch.save(model.state_dict(), args.result_dir+'/model_task_B.pth')
     
  
-    
+# USED FOR FIGURE 5   
 if args.learning_scenario == 'Task incremental' and args.dataset=='CIFAR110' and args.boundary=="Clear":
     Acc_train=[]
     Acc_test=[]
@@ -249,7 +185,7 @@ if args.learning_scenario == 'Task incremental' and args.dataset=='CIFAR110' and
     plt.ylim([0.1,1])
     plt.savefig(args.result_dir+'/main_result.svg') 
 
-    
+# USED FOR FIGURE 5      
 if args.learning_scenario == 'Task incremental' and args.dataset=='CIFAR110' and args.boundary=="Unclear":
     Acc_train=[]
     Acc_test=[]
@@ -308,342 +244,8 @@ if args.learning_scenario == 'Task incremental' and args.dataset=='CIFAR110' and
     plt.ylim([0.1,1])
     plt.savefig(args.result_dir+'/main_result.svg') 
 
-
-
-if args.learning_scenario == 'Classic' and args.hessian_approx == 'None' and args.parameter_search == 'None':
-    Acc_train=[]
-    Acc_test=[]
-    AUCA=[]
-    AUCE=[]
-    AUCE_P=[]    
-    X_ood = DL.X_ood
-    X_ood_P = DL.X_ood_P
-
-    with tqdm(total=args.train_epochs, desc='Training Progress', unit='epoch') as pbar:
-            for epoch in range(args.train_epochs):
-                order = np.random.permutation(len(X_train))
-                X_train=X_train[order]
-                Y_train=Y_train[order]
-                start_time = time.time()
-                loss=TR.train(X_train, Y_train, batch_size=args.batch_size, samples_train=args.samples_train)
-                acc_train=TR.Eval(X_train,Y_train, batch_size=args.batch_size_inf, samples_inf=args.samples_inf)
-                if args.algo == 'DET':
-                    acc_test=TR.Eval(X_test,Y_test, batch_size=args.batch_size_inf, samples_inf=0)
-
-                else: 
-                    predictive, aleatoric, epistemic, acc_test, idx_y_pred =utils.acc_and_uncertainties(model, X_test, Y_test, batch_size=args.batch_size_inf, samples_inf=args.samples_inf)
-                    auca = utils.eval_aleatoric(aleatoric, idx_y_pred, Y_test)
-                    predictive_un, aleatoric_un, epistemic_un = utils.uncertainties(model, X_ood, batch_size=args.batch_size_inf, samples_inf=args.samples_inf)
-                    auce = utils.eval_epistemic(epistemic, epistemic_un, X_test, X_ood)
-                    AUCA.append(auca)
-                    AUCE.append(auce)
-                    if X_ood_P is not None:
-                        predictive_un_p, aleatoric_un_p, epistemic_un_p = utils.uncertainties(model, X_ood_P, batch_size=args.batch_size_inf, samples_inf=args.samples_inf)
-                        auce_p = utils.eval_epistemic(epistemic, epistemic_un_p, X_test, X_ood_P)
-                        AUCE_P.append(auce_p)
-                Acc_train.append(acc_train)
-                Acc_test.append(acc_test)
-                end_time = time.time()
-                duration = end_time - start_time
-                duration = round(duration,2)
-                pbar.set_postfix({
-                    'acc_train': f'{acc_train:.3f}', 
-                    'acc_test': f'{acc_test:.3f}',
-                    'duration': f'{duration:.2f}s'
-                })
     
-                pbar.update(1)
-        
-    torch.save(model.state_dict(), args.result_dir+'/model.pth')            
-    np.savetxt(args.result_dir+'/acc_train',Acc_train)
-    np.savetxt(args.result_dir+'/acc_test',Acc_test)
-    np.savetxt(args.result_dir+'/auca',AUCA)
-    np.savetxt(args.result_dir+'/auce',AUCE)
-    np.savetxt(args.result_dir+'/auce_p',AUCE_P)
-    
-    plt.plot(Acc_test, label='accuracy', color='C0')
-    plt.plot(AUCA, label='aleatoric', color='C2')
-    plt.plot(AUCE, label='epistemic', color='C3')
-    plt.xlabel('Epochs')
-    plt.ylabel('Performances')
-    plt.legend()
-    plt.savefig(args.result_dir+'main_result.svg')
-    
-    if args.algo != 'DET':
-        predictive, aleatoric, epistemic, acc_test, idx_y_pred =utils.acc_and_uncertainties(model, X_test, Y_test,batch_size=args.batch_size_inf, samples_inf=args.samples_inf)
-        predictive_un, aleatoric_un, epistemic_un = utils.uncertainties(model, X_ood, batch_size=args.batch_size_inf, samples_inf=args.samples_inf)
-        np.savetxt(args.result_dir+'/idx', idx_y_pred.cpu().detach().numpy())
-        np.savetxt(args.result_dir+'/labels', Y_test.cpu().detach().numpy())
-        np.savetxt(args.result_dir+'/aleatoric', aleatoric.cpu().detach().numpy())
-        np.savetxt(args.result_dir+'/epistemic', epistemic.cpu().detach().numpy())
-        np.savetxt(args.result_dir+'/aleatoric_un', aleatoric_un.cpu().detach().numpy())
-        np.savetxt(args.result_dir+'/epistemic_un', epistemic_un.cpu().detach().numpy())
-        if X_ood_P is not None:
-            predictive_un_p, aleatoric_un_p, epistemic_un_p = utils.uncertainties(model, X_ood_P, batch_size=args.batch_size_inf, samples_inf=args.samples_inf)
-            np.savetxt(args.result_dir+'/aleatoric_un_p', aleatoric_un_p.cpu().detach().numpy())
-            np.savetxt(args.result_dir+'/epistemic_un_p', epistemic_un_p.cpu().detach().numpy())
-            
-
-
-if args.learning_scenario == 'Domain incremental' and args.dataset=='MNIST':
-
-    
-   
-    ACC = np.zeros((args.num_task, args.num_task * args.train_epochs))
-    EP = np.zeros((args.num_task * args.train_epochs))
-    EP_un = np.zeros((args.num_task * args.train_epochs))
-
-    sigma = np.zeros((args.num_task * args.train_epochs, 2))
-    PERM = []
-    np.random.seed(args.random_seed)
-    for i in range(args.num_task):
-        PERM.append(np.random.permutation(784))
-    
-    with tqdm(total=args.num_task-1, desc='Training Progress', unit='mod') as pbar:
-        start_time = time.time()
-        for mod in range(args.num_task - 1):
-            X_train = DL.X_train[:, PERM[mod]]
-            X_test= DL.X_test[:, PERM[mod]]
-            for epoch in range(args.train_epochs):
-                order = np.random.permutation(len(X_train))
-                X_train= X_train[order]
-                Y_train = Y_train[order]
-                loss = TR.train(X_train, Y_train, args.batch_size, args.samples_train)
-                acc = TR.eval_domain_inc(X_test, Y_test, PERM, args.num_task, args.samples_inf)
-                ACC[:, epoch + mod * args.train_epochs] = acc
-                if args.algo != 'DET':
-                    sigma[epoch + mod * args.train_epochs] = model.layers[-1].weight.sigma.mean().cpu().detach().numpy(), model.layers[-1].weight.sigma.std().cpu().detach().numpy()       
-                    predictive_un, aleatoric_un, epistemic_un = utils.uncertainties(model, DL.Xood, batch_size=args.batch_size_inf, samples_inf=args.samples_inf)
-                    predictive, aleatoric, epistemic = utils.uncertainties(model, X_test, batch_size=args.batch_size_inf, samples_inf=args.samples_inf)
-                    EP_un[epoch + mod * args.train_epochs] = epistemic_un.detach().cpu().numpy().mean()
-                    EP[epoch + mod * args.train_epochs] = epistemic.detach().cpu().numpy().mean()
-                epoch += 1
-            acc_test = acc[mod]
-            acc_test_prev = acc[mod-1]
-            end_time = time.time()
-            duration = end_time - start_time
-            duration = round(duration,2)
-            pbar.set_postfix({
-                'loss': f'{loss:.3f}',
-                'acc_test': f'{acc_test:.3f}',
-                'acc_test_prev': f'{acc_test_prev:.3f}',
-                'duration': f'{duration:.2f}s'
-            })
-        
-            pbar.update(1)
-    
-    np.savetxt(args.result_dir+'/accuracy', ACC) 
-    np.savetxt(args.result_dir+'/sigma', sigma) 
-    np.savetxt(args.result_dir+'/epistemic', EP) 
-    np.savetxt(args.result_dir+'/epistemic_un', EP_un) 
-
-    for j in range(len(ACC) - 1):
-        plt.plot(range(args.train_epochs * (len(ACC) - 1)), ACC[j, :args.train_epochs * (len(ACC) - 1)])
-    plt.axhline(y=0.98, color='gray', linestyle='--', linewidth=1) 
-    mean = np.mean(ACC[:,args.train_epochs * (len(ACC) - 1)],0)
-    plt.title('mean accuracy: '+str(mean))
-    plt.xlabel('Number of epochs')
-    plt.ylabel('Accuracy')
-    plt.savefig(args.result_dir+'main_result.svg')
-    
-    
-if args.learning_scenario == 'Classic' and (args.dataset in {'ANIMALS', 'CIFAR20'}) and args.parameter_search=='Single_search':  
-    ACC=[]
-    for m in range(args.moy_over):
-        DL = DataLoader(vars(args))
-        X_train=DL.X_train
-        X_test=DL.X_test
-        Y_train=DL.Y_train
-        Y_test=DL.Y_test
-        # Define the right model and optimizer for the experiment
-        model,optimizer = utils.select_model_and_optim(vars(args))
-        # Define the right Trainer
-        TR = Trainer(args.learning_scenario, args.algo, optimizer, model, clamp_grad=args.clamp_grad)
-
-        X_train_mod1 = X_train[0]
-        X_test_mod1 = X_test[0]
-       
-        Y_train_mod1 = Y_train[0]
-        Y_test_mod1 = Y_test[0]
-       
-        for epoch in range(args.train_epochs):
-            order = np.random.permutation(len(X_train_mod1))
-            X_train_mod1= X_train_mod1[order]
-            Y_train_mod1 = Y_train_mod1[order]
-            loss = TR.train(X_train_mod1, Y_train_mod1, batch_size=args.batch_size, samples_train=args.samples_train)
-            
-            acc = TR.Eval(X_test_mod1, Y_test_mod1, batch_size=args.batch_size_inf, samples_inf=args.samples_inf)
-            if args.algo=="DET":
-                print(args.algo, "lr: ",  args.lr,"   accuracy test:", acc )
-            if args.algo!="DET":
-                print(args.algo, "coeff update mu: ",  args.c_mu,"   accuracy test:", acc )
-                print(args.c_sigma)
-        ACC.append(acc)
-    np.savetxt(args.result_dir+'/accuracy', ACC) 
-    if args.algo!='DET':
-        sigma1= model.layers[0].weight.sigma.cpu().detach().numpy()
-        sigma2= model.layers[-1].weight.sigma.cpu().detach().numpy()
-        np.savetxt(args.result_dir+'/sigma1', sigma1) 
-        np.savetxt(args.result_dir+'/sigma2', sigma2) 
-
-if args.learning_scenario == 'Classic' and (args.dataset in {'ANIMALS', 'CIFAR20'}) and args.parameter_search=='Grid_search':  
-    i,j=0,0
-    for c_mu in args.L_cmu:
-        for sigma_p in args.L_sigma_prior:
-            args.c_mu = c_mu
-            args.sigma_prior = sigma_p
-            args.sigma_init = sigma_p
-            args.clamp_sigma = [1e-4,sigma_p]
-            ACC=[]
-            for m in range(args.moy_over):
-                DL = DataLoader(vars(args))
-                X_train=DL.X_train
-                X_test=DL.X_test
-                Y_train=DL.Y_train
-                Y_test=DL.Y_test
-                # Define the right model and optimizer for the experiment
-                model,optimizer = utils.select_model_and_optim(vars(args))
-                # Define the right Trainer
-                TR = Trainer(args.learning_scenario, args.algo, optimizer, model, clamp_grad=args.clamp_grad)
-                X_train_mod1 = X_train[0]
-                X_test_mod1 = X_test[0]
-               
-                Y_train_mod1 = Y_train[0]
-                Y_test_mod1 = Y_test[0]
-               
-                for epoch in range(args.train_epochs):
-                    order = np.random.permutation(len(X_train_mod1))
-                    X_train_mod1= X_train_mod1[order]
-                    Y_train_mod1 = Y_train_mod1[order]
-                    loss = TR.train(X_train_mod1, Y_train_mod1, batch_size=args.batch_size, samples_train=args.samples_train)
-                    
-                    acc = TR.Eval(X_test_mod1, Y_test_mod1, batch_size=args.batch_size_inf, samples_inf=args.samples_inf)
-                    if args.algo!="MESU":
-                        print('You are playing with MESU parameters, use MESU!')
-                    if args.algo=="MESU":
-                        print(args.algo, "Sigma prior: ",  optimizer.sigma_prior, "Accel mu: ",  optimizer.c_mu,"   accuracy test:", acc )
-                ACC.append(acc)
-            np.savetxt(args.result_dir+'/accuracy'+str(i)+str(j), ACC) 
-            if args.algo!='DET':
-                sigma1= model.layers[0].weight.sigma.cpu().detach().numpy()
-                sigma2= model.layers[-1].weight.sigma.cpu().detach().numpy()
-                np.savetxt(args.result_dir+'/sigma_first'+str(i)+str(j), sigma1) 
-                np.savetxt(args.result_dir+'/sigma_last'+str(i)+str(j), sigma2) 
-            j+=1
-                
-        j=0
-        i+=1
- 
-if args.learning_scenario == 'Classic' and (args.dataset in {'MNIST', 'CIFAR10'}) and args.parameter_search=='Grid_search':  
-    i,j=0,0
-    for c_mu in args.L_cmu:
-        for ratio_max in args.L_ratio_max:
-            args.c_mu = c_mu
-            args.ratio_max = ratio_max
-            ACC=[]
-            for m in range(args.moy_over):
-                DL = DataLoader(vars(args))
-                X_train=DL.X_train
-                X_test=DL.X_test
-                Y_train=DL.Y_train
-                Y_test=DL.Y_test
-                # Define the right model and optimizer for the experiment
-                model,optimizer = utils.select_model_and_optim(vars(args))
-                print(model)
-
-                # Instantiate the model and count parameters
-                print(f"Total parameters: {sum(p.numel() for p in model.parameters())}")
-                # Define the right Trainer
-                TR = Trainer(args.learning_scenario, args.algo, optimizer, model, clamp_grad=args.clamp_grad)
-               
-                for epoch in range(args.train_epochs):
-                    order = np.random.permutation(len(X_train))
-                    X_train= X_train[order]
-                    Y_train = Y_train[order]
-                    loss = TR.train(X_train, Y_train, batch_size=args.batch_size, samples_train=args.samples_train)
-                    
-                    acc = TR.Eval(X_test, Y_test, batch_size=args.batch_size_inf, samples_inf=args.samples_inf)
-                    if args.algo!="MESU":
-                        print('You are playing with MESU parameters, use MESU!')
-                    if args.algo=="MESU":
-                        print(args.algo, "ratio_max: ",  optimizer.ratio_max, "Accel mu: ",  optimizer.c_mu,"   accuracy test:", acc )
-                ACC.append(acc)
-            np.savetxt(args.result_dir+'/accuracy'+str(i)+str(j), ACC) 
-            j+=1
-                
-        j=0
-        i+=1        
-        
-if args.learning_scenario == 'Classic' and (args.dataset in {'MNIST', 'CIFAR10'}) and args.parameter_search=='Single_search':  
-    ACC=[]
-    for m in range(args.moy_over):
-        # Define the right model and optimizer for the experiment
-        model,optimizer = utils.select_model_and_optim(vars(args))
-        # Define the right Trainer
-        TR = Trainer(args.learning_scenario, args.algo, optimizer, model, clamp_grad=args.clamp_grad)
-        for epoch in range(args.train_epochs):
-            order = np.random.permutation(len(X_train))
-            X_train= X_train[order]
-            Y_train = Y_train[order]
-            loss = TR.train(X_train, Y_train, batch_size=args.batch_size, samples_train=args.samples_train)
-            acc = TR.Eval(X_test, Y_test, batch_size=args.batch_size_inf, samples_inf=args.samples_inf)
-            if args.algo=="DET":
-                print(args.algo, "lr: ",  args.lr,"   accuracy test:", acc )
-            if args.algo!="DET":
-                print(args.algo, "coeff likeli mu: ",  args.c_mu,"   accuracy test:", acc )
-        ACC.append(acc)
-    np.savetxt(args.result_dir+'/accuracy', ACC) 
-    
-    
-        
-if args.learning_scenario == 'Domain incremental' and args.dataset=='CIFAR20':  
-    for m in range(args.moy_over):
-        ACC=[]
-        # Define the right model and optimizer for the experiment
-        model,optimizer = utils.select_model_and_optim(vars(args))
-        DL = DataLoader(vars(args))
-        X_train=DL.X_train
-        X_test=DL.X_test
-        Y_train=DL.Y_train
-        Y_test=DL.Y_test
-
-        # Define the right Trainer
-        TR = Trainer(args.learning_scenario, args.algo, optimizer, model, clamp_grad=args.clamp_grad)
-        with tqdm(total=5*args.train_epochs-1, desc='Training Progress', unit='mod') as pbar:
-             start_time = time.time()
-             for mod in range(5):        
-                 for epoch in range(args.train_epochs):
-                     order=np.random.permutation(len(X_train[mod]))
-                     X_train[mod] = X_train[mod][order]
-                     Y_train[mod] = Y_train[mod][order]
-                     loss = TR.train(X_train[mod], Y_train[mod], batch_size=args.batch_size, samples_train=args.samples_train)
-                     acc1 = TR.Eval(X_test[0], Y_test[0], batch_size=args.batch_size_inf, samples_inf=args.samples_inf)
-                     acc2 = TR.Eval(X_test[1], Y_test[1], batch_size=args.batch_size_inf, samples_inf=args.samples_inf)
-                     acc3 = TR.Eval(X_test[2], Y_test[2], batch_size=args.batch_size_inf, samples_inf=args.samples_inf)
-                     acc4 = TR.Eval(X_test[3], Y_test[3], batch_size=args.batch_size_inf, samples_inf=args.samples_inf)
-                     acc4 = TR.Eval(X_test[4], Y_test[4], batch_size=args.batch_size_inf, samples_inf=args.samples_inf)
-
-                     # acc5 = TR.Eval(X_test[4], Y_test[4], batch_size=args.batch_size_inf, samples_inf=args.samples_inf)
-                     ACC.append([acc1,acc2,acc3,acc4])
-                   
-                     end_time = time.time()
-                     duration = end_time - start_time
-                     duration = round(duration,2)
-                     pbar.set_postfix({
-                         'loss': f'{loss:.3f}',
-                         'acc1': f'{acc1:.3f}',
-                         'acc2': f'{acc2:.3f}',
-                         'acc3': f'{acc3:.3f}',
-                         'acc4': f'{acc4:.3f}',
-                         'duration': f'{duration:.2f}s'
-                     })
-                 
-                     pbar.update(1)
-                 
-            
-        ACC=np.array(ACC)
-        np.savetxt(args.result_dir+'/accuracy'+str(m), ACC) 
-      
+### THIS IS THE CODE FOR FIGURE 2 IN THE MAIN PAPER        
 if args.learning_scenario == 'Domain incremental' and args.dataset=='ANIMALS':  
     for m in range(args.moy_over):
         ACC=[]
@@ -704,11 +306,12 @@ if args.learning_scenario == 'Domain incremental' and args.dataset=='ANIMALS':
            
             
            
-            
+# IF YOU WANT TO SEE SOME PLOTS BEFORE THE END OF THE SIMULATION            
 def hess(sigma,sigma_prior,N):
     NH= (1/sigma**2)
     return NH/(N)
                 
+# THIS IS THE CODE FOR THE SUPPLEMENTARY FIGURE ON HESSIAN APPROXIMATION
 if args.hessian_approx != 'None':     
     for m in range(args.moy_over):
         it = 0  

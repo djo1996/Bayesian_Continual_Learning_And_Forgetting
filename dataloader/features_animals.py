@@ -13,11 +13,14 @@ import torch
 from torch import nn
 import matplotlib.pyplot as plt
 from torchvision.models import resnet18,  ResNet18_Weights
-# from torchvision.models import efficientnet_b0, EfficientNet_B0_Weights
+# from torchvision.models import efficientnet_b0, EfficientNet_B0_Weights  ALTERNATIVE FEATURE EXTRACTOR NOT THE ONE USED FOR THE MAIN PAPER
 
 import numpy as np
 
-
+# THIS IS THE CODE USED TO CREATE THE FEATURES OF THE ANIMALS DATASET.  
+# I LEAVE IT HERE FOR ANYONE WHO WANTS TO DO SOMETHING SIMILAR.  
+# HOWEVER, I DO NOT PROVIDE ALL THE COMMANDS TO CREATE THE FILES USED FOR THE ANIMAL FIGURES.  
+# THEY ARE SAVED IN THE DATASET FOLDER.
 
 # We prefer to load only the batch of data we are currently using into the GPU, to save GPU memory.
 torch.set_default_device('cpu')
@@ -45,14 +48,8 @@ def get_dataloaders(ds, lengths=[0.8, 0.2], batch_size=360, seed=42, num_workers
     return train_loader, test_loader
 
 ds = get_dataset(data_path, default_transforms)
-# print(len(ds))
 train_loader, test_loader = get_dataloaders(ds, [1,  0.], batch_size= 286)
-# print(len(train_loader))
 
-# class_names = ['bee', 'shark', 'gorilla', 'sparrow', 'coyote', 'mosquito', 'whale', 'orangutan', 'pigeon', 'wolf', 'fly', 'dolphin', 'chimpanzee', 'sandpiper', 'dog']
-
-# class_names = ['chat', 'chien','papillion']
-# class_names=np.loadtxt('../datasets/ANIMALS_90/name of the animals.txt',dtype=str)
 mean=[0.485, 0.456, 0.406] 
 std=[0.229,0.224,0.225]
 
@@ -74,22 +71,7 @@ def inv_normalize1(batch_image, mean, std):
 
     return batch_image_clone.permute(0, 2, 3, 1)
 
-# curr_image = inv_normalize1(image, mean, std)
-# for i in range(16):
-#     graph = plt.subplot(4, 4, i + 1)
-#     plt.imshow(curr_image[i].numpy().astype('uint8'))
-#     plt.title(label[i],fontsize=24)
-#     plt.axis('off')
-# plt.savefig('domain_inc_animals_a.svg')    
-# plt.show()
 
-    
-# def reduce_channels(x):
-#     # Split the 40 channels into 3 groups (13, 13, and 14 channels)
-#     x_split = torch.split(x, [11, 11, 10], dim=1)  # Splits the channels
-#     # Take the mean across each group
-#     x = torch.stack([torch.mean(group, dim=1) for group in x_split], dim=1)  
-#     return x  # Output shape: (16, 3, 28, 28)
  
 class CNN(nn.Module):
     """
@@ -98,9 +80,7 @@ class CNN(nn.Module):
     """
     def __init__(self, ):
         super(CNN, self).__init__()
-        # weights = EfficientNet_B0_Weights.DEFAULT
         weights = ResNet18_Weights
-        # self.efficientnet = efficientnet_b0(weights=weights,progress=False).eval() 
         self.efficientnet = resnet18(weights=weights,progress=False).eval() 
         self.transform_train = transforms.Compose([
         transforms.RandomHorizontalFlip(0.5),

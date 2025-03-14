@@ -12,6 +12,9 @@ import torch.nn.functional as F
 import torchvision.transforms as transforms
 from models import Conv2d_BBB_GP, Linear_BBB_GP
 
+# NOT USED IN THE MAIN ARTICLE, THIS IS TO IMPLEMENT BAYES BY BACKPROP
+# I LEAVE IT HERE IN CASE SOMEONE IS INTERESTED
+
 
 # Check if CUDA is available
 if torch.cuda.is_available():

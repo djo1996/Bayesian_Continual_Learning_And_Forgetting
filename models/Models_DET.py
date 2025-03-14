@@ -46,7 +46,7 @@ class CNN_CIFAR_K_HEAD_DET(nn.Module):
         self.heads = nn.ModuleList()
         for k in range(self.num_heads):
             self.heads.append(nn.Linear(512, self.num_classes))
-        self.transform_train = transforms.RandomHorizontalFlip(0.)
+        self.transform_train = transforms.RandomHorizontalFlip(0.) #NOT USED AT THE END
         
         
     def forward(self, x, head=0):

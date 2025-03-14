@@ -52,18 +52,16 @@ class MESU(object):
         self.ratio_max = args_dict['ratio_max']
         self.moment_sigma = args_dict['moment_sigma']
         self.moment_mu = args_dict['moment_mu']
-        self.loss = 0
-        self.num_params = len(list(model.parameters())) 
-        print(f'Optimizer initialized with {self.num_params} Gaussian variational Tensor parameters.')
+
+        num_params = len(list(model.parameters())) 
+        print(f'Optimizer initialized with {num_params} Gaussian variational Tensor parameters.')
         self.grad_eff_sigma={}
-        self.hess_approx={}
         self.grad_eff_mu={}
-        with torch.no_grad():
-            for i, (name, param) in enumerate(model.named_parameters(recurse=True)):
-                if name.endswith('sigma'):
-                   self.grad_eff_sigma[name]=torch.zeros_like(param.data)
-                if name.endswith('mu'):
-                   self.grad_eff_mu[name]=torch.zeros_like(param.data)
+        for i, (name, param) in enumerate(model.named_parameters(recurse=True)):
+            if name.endswith('sigma'):
+                self.grad_eff_sigma[name]=torch.zeros_like(param)
+            if name.endswith('mu'):
+                self.grad_eff_mu[name]=torch.zeros_like(param)
                 
     def step(self,):
         """Performs a single optimization step."""
@@ -71,7 +69,6 @@ class MESU(object):
         mesu(model=self.model,
              grad_eff_sigma = self.grad_eff_sigma,
              grad_eff_mu = self.grad_eff_mu,
-             hess_approx = self.hess_approx,
              moment_sigma = self.moment_sigma,
              moment_mu = self.moment_mu,
              mu_prior = self.mu_prior,
@@ -83,16 +80,16 @@ class MESU(object):
              clamp_sigma = self.clamp_sigma,
              clamp_mu = self.clamp_mu,
              ratio_max = self.ratio_max,
-             loss = self.loss
             )
 
 
 
-def mesu(model: Module, *, grad_eff_sigma:Tensor,grad_eff_mu:Tensor, hess_approx:Tensor, moment_sigma: float, moment_mu: float, mu_prior:float, sigma_prior: float, N: int, c_sigma:float, c_mu:float, second_order:bool, clamp_sigma:list, clamp_mu:list, ratio_max:float, loss:float):
-    num_params_tot = sum(p.numel() for p in model.parameters())
+def mesu(model: Module, *, grad_eff_sigma:Tensor,grad_eff_mu:Tensor, moment_sigma: float, moment_mu: float, mu_prior:float, sigma_prior: float, N: int, c_sigma:float, c_mu:float, second_order:bool, clamp_sigma:list, clamp_mu:list, ratio_max:float):
+
     previous_param = None
     for i, (name, param) in enumerate(model.named_parameters(recurse=True)):
-        num_params_layer = param.numel()
+        
+    
         if name.endswith('sigma'):
             sigma=param
             variance=param.data**2
@@ -103,7 +100,6 @@ def mesu(model: Module, *, grad_eff_sigma:Tensor,grad_eff_mu:Tensor, hess_approx
             grad_mu=param.grad
             name_mu = name
             if grad_sigma!=None and grad_mu!=None:
-                ### MOMENTUM ANS DENOMINATOR ARE NOT USED IN MESU
                 grad_eff_sigma[name_sigma].mul_(moment_sigma)
                 grad_eff_sigma[name_sigma].add_((1-moment_sigma)*grad_sigma)
                 grad_eff_mu[name_mu].mul_(moment_mu)
@@ -115,22 +111,21 @@ def mesu(model: Module, *, grad_eff_sigma:Tensor,grad_eff_mu:Tensor, hess_approx
                 delta_mu = torch.clamp(delta_mu,-ratio_max*sigma.data,ratio_max*sigma.data)
                 sigma.data.add_(delta_sigma)
                 mu.data.add_(delta_mu)
-                
+                if clamp_sigma[0]!=0:
+                    sigma.data=torch.clamp(sigma.data,clamp_sigma[0],clamp_sigma[1])
+                if clamp_mu[0]!=0:
+                    mu.data=torch.clamp(mu.data,clamp_mu[0],clamp_mu[1])
         
             if grad_sigma==None and grad_mu!=None:
-                #When we have determinist convolution we want to use mesu det we will need hess approx :) be carefull in that case we need the loss in the optimizer...
-                loss_approx = 0.5* ((grad_mu.data**2)*variance).mean()
-                hess_approx_ = loss_approx/((variance) * loss+1e-2)
-                # Now we can update sigma based on the relation we have betwwen the gradient over sigma and H 
-                grad_sigma = hess_approx_*sigma.data  
-                denominator = 1 + second_order * sigma * grad_sigma
-                delta_sigma = -c_sigma*(variance * grad_sigma + sigma.data * (variance-sigma_prior ** 2) / (N* (sigma_prior** 2))) / denominator
-                delta_mu = -c_mu*(variance* grad_mu + variance * (mu.data-mu_prior) / (N * sigma_prior **2)) / denominator
-                delta_sigma = torch.clamp(delta_sigma,-ratio_max*sigma.data,ratio_max*sigma.data)
-                delta_mu = torch.clamp(delta_mu,-ratio_max*sigma.data,ratio_max*sigma.data)
-                sigma.data.add_(delta_sigma)
-                mu.data.add_(delta_mu)
-                
+                #When we have determinist convolution
+                mu.data.add_(-(variance * grad_mu ))
+                # mu.data.add_(-(variance * grad_mu + variance * (mu.data-mu_prior) / (N * sigma_prior ** 2)))
+
+                if clamp_mu[0]!=0:
+                    mu.data=torch.clamp(mu.data,clamp_mu[0],clamp_mu[1])
+                    
+          
+           
 
 class BGD(object):
     r"""
@@ -153,61 +148,46 @@ class BGD(object):
         self.clamp_sigma = args_dict['clamp_sigma']
         self.clamp_mu = args_dict['clamp_mu']
         self.ratio_max= args_dict['ratio_max']
-        self.loss = 0
         num_params = len(list(model.parameters())) 
         print(f'Optimizer initialized with {num_params} Gaussian variational Tensor parameters.')
-        self.hess_approx={}
-        for i, (name, param) in enumerate(model.named_parameters(recurse=True)):
-            if name.endswith('sigma'):
-                self.hess_approx[name]=torch.ones_like(param)/param**2 -1
-        
-                
 
     def step(self):
         """Performs a single optimization step."""
         
         bgd(model=self.model,
-            hess_approx = self.hess_approx, 
             c_sigma=self.c_sigma,
             c_mu=self.c_mu,
             clamp_sigma = self.clamp_sigma,
             clamp_mu = self.clamp_mu,
             ratio_max = self.ratio_max,
-            loss = self.loss
                 )
 
-def bgd(model: Module, *, hess_approx:Tensor, c_sigma:float, c_mu:float, clamp_sigma:list, clamp_mu:list, ratio_max:float, loss:float):
+def bgd(model: Module, *, c_sigma:float, c_mu:float, clamp_sigma:list, clamp_mu:list, ratio_max:float):
     previous_param = None
-    num_params_tot = sum(p.numel() for p in model.parameters())
     for i, (name, param) in enumerate(model.named_parameters(recurse=True)):
-        num_params_layer = param.numel()
+        
+    
         if name.endswith('sigma'):
             sigma=param
-            variance = sigma.data**2         
+            variance=param.data**2
             grad_sigma=param.grad
-            name_sigma = name
         if name.endswith('mu'):
             mu=param
             grad_mu=param.grad
             if grad_sigma!=None and grad_mu!=None:
-                delta_sigma = c_sigma*(-0.5 * (sigma.data**2) * grad_sigma + sigma.data * (-1 + (1 + 0.25 * ((sigma.data**2) * (grad_sigma ** 2))) ** 0.5))
-                delta_mu = c_mu*(-(sigma.data**2) * grad_mu)
+                delta_sigma = c_sigma*(-0.5 * variance * grad_sigma + sigma.data * (-1 + (1 + 0.25 * (variance * (grad_sigma ** 2))) ** 0.5))
+                delta_mu = c_mu*(-variance * grad_mu)
                 delta_sigma = torch.clamp(delta_sigma,-ratio_max*sigma.data,ratio_max*sigma.data)
                 delta_mu = torch.clamp(delta_mu,-ratio_max*sigma.data,ratio_max*sigma.data)
                 sigma.data.add_(delta_sigma)
                 mu.data.add_(delta_mu)
-               
+                if clamp_sigma[0]!=0:
+                    sigma.data=torch.clamp(sigma.data,clamp_sigma[0],clamp_sigma[1])
+                if clamp_mu[0]!=0:
+                    mu.data=torch.clamp(sigma.data,clamp_mu[0],clamp_mu[1])
+                    
             if grad_sigma==None and grad_mu!=None:
-                #When we have determinist convolution we want to use mesu det we will need hess approx :) be carefull in that case we need the loss in the optimizer...
-                loss_approx = 0.5* ((grad_mu.data**2)*variance).mean()
-                hess_approx_ = loss_approx/(variance * loss+1e-2)
-                # Now we can update sigma based on the relation we have betwwen the gradient over sigma and H 
-                grad_sigma = hess_approx_*sigma.data
-                # Now we can update sigma based on the relation we have betwwen the gradient over sigma and H 
-                delta_sigma = c_sigma*(-0.5 * variance * (grad_sigma) + sigma.data * (-1 + (1 + 0.25 * (variance * ((grad_sigma) ** 2))) ** 0.5))
-                delta_mu = c_mu*(-variance* grad_mu)
-                delta_sigma = torch.clamp(delta_sigma,-ratio_max*sigma.data,ratio_max*sigma.data)
-                delta_mu = torch.clamp(delta_mu,-ratio_max*sigma.data,ratio_max*sigma.data)
-                sigma.data.add_(delta_sigma)
-                mu.data.add_(delta_mu)
-                
+                mu.data.add_(-(variance * grad_mu))
+                if clamp_mu[0]!=0:
+                    mu.data=torch.clamp(sigma.data,clamp_mu[0],clamp_mu[1])
+    

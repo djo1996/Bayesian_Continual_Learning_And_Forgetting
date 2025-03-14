@@ -51,7 +51,7 @@ class CNN_CIFAR_K_HEAD(nn.Module):
         self.heads = nn.ModuleList()
         for k in range(self.num_heads):
             self.heads.append(Linear_MetaBayes(512, self.num_classes, sigma_init=sigma_init_fc, sigma_prior=sigma_prior))
-        self.transform_train = transforms.RandomHorizontalFlip(0.)
+        self.transform_train = transforms.RandomHorizontalFlip(0.) #NOT USED AT THE END
         if activation == 'Tanh':
             self.act = torch.nn.Tanh()
         elif activation == 'Hardtanh':
@@ -114,111 +114,8 @@ class CNN_CIFAR_K_HEAD(nn.Module):
             if name.endswith('sigma'):
                 yield param
 
-
-
-class CNN_CIFAR_K_HEAD_MIXTE(nn.Module):
-    """
-    Convolutional neural network used for classic learning on CIFAR10. 
-    Same architecture as in F. Zenke "Continual Learning Through Synaptic Intelligence" (2017).
-    """
-    def __init__(self, args_dict):
-        super(CNN_CIFAR_K_HEAD_MIXTE, self).__init__()
-        sigma_init_fc=args_dict['sigma_init']
-        sigma_init_conv=args_dict['sigma_init_conv']
-        sigma_prior=args_dict['sigma_prior']
-        activation = args_dict['activation']
-        self.coeff_likeli = args_dict['coeff_likeli']
-        self.reduction = args_dict['reduction']
-        self.num_classes = args_dict['num_classes']
-        self.num_heads = args_dict['num_heads']
-        self.conv1 = Conv2d_MetaBayes(3, 32, 3, padding='same', sigma_init=sigma_init_conv, sigma_prior=sigma_prior)
-        self.conv2 = Conv2d_MetaBayes(32, 32, 3, sigma_init=sigma_init_conv, sigma_prior=sigma_prior)
-        self.conv3 = Conv2d_MetaBayes(32, 64, 3, padding='same', sigma_init=sigma_init_conv, sigma_prior=sigma_prior)
-        self.conv4 = Conv2d_MetaBayes(64, 64, 3, sigma_init=sigma_init_conv, sigma_prior=sigma_prior)
-        self.pool = nn.MaxPool2d(2, 2)
-        self.drop_conv = nn.Dropout(p=0.25)
-        self.drop_fc = nn.Dropout(p=0.5)
-        self.fc1 = Linear_MetaBayes(2304, 512, sigma_init=sigma_init_fc, sigma_prior=sigma_prior)
-        self.heads = nn.ModuleList()
-        for k in range(self.num_heads):
-            self.heads.append(Linear_MetaBayes(512, self.num_classes, sigma_init=sigma_init_fc, sigma_prior=sigma_prior))
-        self.transform_train = transforms.RandomHorizontalFlip(0.)
-        if activation == 'Tanh':
-            self.act = torch.nn.Tanh()
-        elif activation == 'Hardtanh':
-            self.act = torch.nn.Hardtanh(min_val=-2, max_val=2)
-        elif activation == 'Relu':
-            self.act = torch.nn.ReLU()
-    def forward(self, x, samples=1, head=0):
-        """ 
-        Forward pass through the network. 
-        If in training mode we apply a random horizontal flip to the input
-        When samples=0, the model is deterministic, but we need samples_dim=1 for reshaping to work.
-        """
-
-        x = self.conv1(x, 0)
-        x = self.act(x)
-        x = self.conv2(x, 0)
-        x = self.act(x)
-        x = self.drop_conv(self.pool(x))
-        x = self.conv3(x, 0)
-        x = self.act(x)
-        x = self.conv4(x, 0)
-        x = self.act(x)
-        x = self.drop_conv(self.pool(x))
-        
-     
-        x = torch.flatten(x, 1)  # Flatten feature maps based on pooled dimensions
-        x = self.fc1(x, samples)
-        x = self.act(x)
-        x = self.drop_fc(x)
-        x = self.heads[head](x, samples)
-        x = F.log_softmax(x, dim=2)
-        return x
-
-    def loss(self, x, target, samples=1, head=0):
-        """
-        Compute the Negative Log Likelihood. No need to compute the kl divergence, it is already taken into account in the update rule.
-        """
-        outputs = self.forward(self.transform_train(x), samples=0, head=head)
-        negative_log_likelihood = F.nll_loss(outputs.mean(0), target, reduction=self.reduction)
-        return negative_log_likelihood*self.coeff_likeli
-
-    
-    # Below are some custom functions that can be used for specific experiments
-    def Mean_parameters(self, recurse: bool = True):
-        """
-        Yield mean parameters, useful for custom experiments.
-        """
-        for name, param in self.named_parameters(recurse=recurse):
-            if name.endswith('mu'):
-                yield param
-    
-    def Std_parameters(self, recurse: bool = True):
-        """
-        Yield standard deviation parameters, useful for custom experiments.
-        """
-        for name, param in self.named_parameters(recurse=recurse):
-            if name.endswith('sigma'):
-                yield param                
-
-class MySequential(nn.Sequential):
-    def forward(self, x, samples=None):
-        for module in self:
-            # If this module needs the samples argument:
-            if isinstance(module, Conv2d_MetaBayes):
-                x = module(x, samples)
-            else:
-                x = module(x)
-        return x
-
-def conv_block(in_channels, out_channels, sigma_init_conv, sigma_prior, pool=False):
-    layers = [Conv2d_MetaBayes(in_channels, out_channels, 3, padding=1, sigma_init=sigma_init_conv, sigma_prior=sigma_prior), 
-              nn.BatchNorm2d(out_channels,affine=False), 
-              nn.ReLU(inplace=True)]
-    if pool: layers.append(nn.MaxPool2d(2))
-    return MySequential(*layers)
-         
+      
+                
 class CNN_CIFAR(nn.Module):
     """
     Convolutional neural network used for classic learning on CIFAR10. 
@@ -233,24 +130,22 @@ class CNN_CIFAR(nn.Module):
         self.coeff_likeli = args_dict['coeff_likeli']
         self.reduction = args_dict['reduction']
         self.num_classes = args_dict['num_classes']
-        self.conv1 = conv_block(3, 64, sigma_init_conv, sigma_prior)
-        self.conv2 = conv_block(64, 128, sigma_init_conv, sigma_prior, pool=True)
-        self.res1a = conv_block(128, 128, sigma_init_conv, sigma_prior)
-        self.res1b = conv_block(128, 128,  sigma_init_conv, sigma_prior)
-        self.conv3 = conv_block(128, 256, sigma_init_conv, sigma_prior, pool=True)
-        self.conv4 = conv_block(256, 512, sigma_init_conv, sigma_prior, pool=True)
-        self.res2a = conv_block(512, 512, sigma_init_conv, sigma_prior)
-        self.res2b = conv_block(512, 512, sigma_init_conv, sigma_prior)
-        self.pool = nn.MaxPool2d(4,4)
-        self.fc = Linear_MetaBayes(512, self.num_classes, sigma_init=sigma_init_fc, sigma_prior=sigma_prior)
-        self.transform_train = transforms.RandomHorizontalFlip(0.5)
+        self.conv1 = Conv2d_MetaBayes(3, 32, 3, padding='same', sigma_init=sigma_init_conv, sigma_prior=sigma_prior)
+        self.conv2 = Conv2d_MetaBayes(32, 32, 3, sigma_init=sigma_init_conv, sigma_prior=sigma_prior)
+        self.conv3 = Conv2d_MetaBayes(32, 64, 3, padding='same', sigma_init=sigma_init_conv, sigma_prior=sigma_prior)
+        self.conv4 = Conv2d_MetaBayes(64, 64, 3, sigma_init=sigma_init_conv, sigma_prior=sigma_prior)
+        self.pool = nn.MaxPool2d(2, 2)
+        self.drop_conv = nn.Dropout(p=0.25)
+        self.drop_fc = nn.Dropout(p=0.5)
+        self.fc1 = Linear_MetaBayes(2304, 512, sigma_init=sigma_init_fc, sigma_prior=sigma_prior)
+        self.fc2 = Linear_MetaBayes(512, self.num_classes, sigma_init=sigma_init_fc, sigma_prior=sigma_prior)
+        self.transform_train = transforms.RandomHorizontalFlip(0.)
         if activation == 'Tanh':
             self.act = torch.nn.Tanh()
         elif activation == 'Hardtanh':
             self.act = torch.nn.Hardtanh(min_val=-2, max_val=2)
         elif activation == 'Relu':
             self.act = torch.nn.ReLU()
-
     def forward(self, x, samples=1):
         """ 
         Forward pass through the network. 
@@ -260,96 +155,19 @@ class CNN_CIFAR(nn.Module):
         samples_dim = max(samples, 1)
         x = x.repeat(samples_dim,1,1,1) 
         x = self.conv1(x, samples)
-        x_pre = self.conv2(x, samples)
-        x = self.res1a(x_pre,samples)
-        x = self.res1b(x,samples)+x_pre
-        x = self.conv3(x, samples)
-        x_pre = self.conv4(x, samples)
-        x = self.res2a(x_pre,samples)
-        x = self.res2b(x,samples)+x_pre
-        x = self.pool(x)
-        # Reshape across sampling and batch dimensions after pooling
-        x = x.view(samples_dim, -1, x.size(1), x.size(2), x.size(3))
-        x = torch.flatten(x, 2)  # Flatten feature maps based on pooled dimensions
-        x = self.fc(x, samples)
-        x = F.log_softmax(x, dim=2)
-        return x
-
-    def loss(self, x, target, samples=1 ):
-        """
-        Compute the Negative Log Likelihood. No need to compute the kl divergence, it is already taken into account in the update rule.
-        """
-        outputs = self.forward(self.transform_train(x), samples=samples)
-        negative_log_likelihood = F.nll_loss(outputs.mean(0), target, reduction=self.reduction)
-        return negative_log_likelihood*self.coeff_likeli
-
-    
-    # Below are some custom functions that can be used for specific experiments
-    def Mean_parameters(self, recurse: bool = True):
-        """
-        Yield mean parameters, useful for custom experiments.
-        """
-        for name, param in self.named_parameters(recurse=recurse):
-            if name.endswith('mu'):
-                yield param
-    
-    def Std_parameters(self, recurse: bool = True):
-        """
-        Yield standard deviation parameters, useful for custom experiments.
-        """
-        for name, param in self.named_parameters(recurse=recurse):
-            if name.endswith('sigma'):
-                yield param
-
-
-class CNN_CIFAR_MIXTE(nn.Module):
-    """
-    Convolutional neural network used for classic learning on CIFAR10. 
-    Same architecture as in F. Zenke "Continual Learning Through Synaptic Intelligence" (2017).
-    """
-    def __init__(self, args_dict):
-        super(CNN_CIFAR_MIXTE, self).__init__()
-        sigma_init_fc=args_dict['sigma_init']
-        sigma_init_conv=args_dict['sigma_init_conv']
-        sigma_prior=args_dict['sigma_prior']
-        activation = args_dict['activation']
-        self.coeff_likeli=args_dict['coeff_likeli']
-        self.reduction=args_dict['reduction']
-        self.num_classes = args_dict['num_classes']
-        self.conv1 = Conv2d_MetaBayes(3, 32, 3, padding='same', sigma_init=sigma_init_conv, sigma_prior=sigma_prior)
-        self.conv2 = Conv2d_MetaBayes(32, 32, 3, sigma_init=sigma_init_conv, sigma_prior=sigma_prior)
-        self.conv3 = Conv2d_MetaBayes(32, 64, 3, padding='same', sigma_init=sigma_init_conv, sigma_prior=sigma_prior)
-        self.conv4 = Conv2d_MetaBayes(64, 64, 3, sigma_init=sigma_init_conv, sigma_prior=sigma_prior)
-        self.pool = nn.MaxPool2d(2, 2)
-        self.drop_conv = nn.Dropout(p=0.25)
-        self.drop_fc = nn.Dropout(p=0.5)
-        self.fc1 = Linear_MetaBayes(2304, 512, sigma_init=sigma_init_fc, sigma_prior=sigma_prior)
-        self.fc2 = Linear_MetaBayes(512, 10, sigma_init=sigma_init_fc, sigma_prior=sigma_prior)
-        self.transform_train = transforms.RandomHorizontalFlip(0.5)
-        if activation == 'Tanh':
-            self.act = torch.nn.Tanh()
-        elif activation == 'Hardtanh':
-            self.act = torch.nn.Hardtanh(min_val=-2, max_val=2)
-        elif activation == 'Relu':
-            self.act = torch.nn.ReLU()
-    def forward(self, x, samples=1, head=1):
-        """ 
-        Forward pass through the network. 
-        If in training mode we apply a random horizontal flip to the input
-        When samples=0, the model is deterministic, but we need samples_dim=1 for reshaping to work.
-        """
-        x = self.conv1(x, 0)
         x = self.act(x)
-        x = self.conv2(x, 0)
+        x = self.conv2(x, samples)
         x = self.act(x)
         x = self.drop_conv(self.pool(x))
-        x = self.conv3(x, 0)
+        x = self.conv3(x, samples)
         x = self.act(x)
-        x = self.conv4(x, 0)
+        x = self.conv4(x, samples)
         x = self.act(x)
         x = self.drop_conv(self.pool(x))
         
-        x = torch.flatten(x, 1)  # Flatten feature maps based on pooled dimensions
+        # Reshape across sampling and batch dimensions after pooling
+        x = x.view(samples_dim, -1, x.size(1), x.size(2), x.size(3))
+        x = torch.flatten(x, 2)  # Flatten feature maps based on pooled dimensions
         x = self.fc1(x, samples)
         x = self.act(x)
         x = self.drop_fc(x)
@@ -383,7 +201,8 @@ class CNN_CIFAR_MIXTE(nn.Module):
         for name, param in self.named_parameters(recurse=recurse):
             if name.endswith('sigma'):
                 yield param
-                
+
+
              
 class FCNN(nn.Module):
     """
@@ -449,27 +268,6 @@ class FCNN(nn.Module):
         negative_log_likelihood = F.nll_loss(outputs.mean(0), target, reduction=self.reduction)
         return negative_log_likelihood * self.coeff_likeli
 
-    
-    # Below are some custom functions that can be used for specific experiments
-    def calculate_importance(self,):
-        """
-        For Synaptic intelligence
-        function taken from https://github.com/GT-RIPL/Continual-Learning-Benchmark/blob/master/agents/regularization.py
-        """
-
-        importance = {}
-        for idx, p in enumerate(self.Mean_parameters()):
-            importance[idx] = p.clone().detach().fill_(0)  # zero initialized
-        prev_params = self.initial_params
-    
-        # Calculate or accumulate the Omega (the importance matrix)
-        for idx, p in importance.items():
-            delta_theta = list(self.Mean_parameters())[idx].detach() - prev_params[idx]
-            p += self.w[idx] / (delta_theta**2 + self.damping_factor)
-            self.w[idx].zero_()
-    
-        return importance
-    
     def Mean_parameters(self, recurse: bool = True):
         """
         Yield mean parameters, useful for custom experiments.

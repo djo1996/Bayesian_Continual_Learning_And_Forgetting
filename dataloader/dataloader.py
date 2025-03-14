@@ -254,32 +254,7 @@ class DataLoader(object):
            self.Y_train = Y_train_tasks
            self.X_test = X_test_tasks
            self.Y_test = Y_test_tasks
-            # class_families = np.array(class_families).T
-            # Generate random permutation for each family
-            # random_permutations = [np.random.permutation(family) for family in class_families]
-            # # Create 5 tasks
-            # for task in range(4):
-            #    current_classes = [random_permutations[i][task] for i in range(5)]
-            #    # Get the training and test samples for the current task's classes
-            #    X_train_task = X_train[np.isin(Y_train, current_classes)]
-            #    Y_train_task = Y_train[np.isin(Y_train, current_classes)]
-            #    X_test_task = X_test[np.isin(Y_test, current_classes)]
-            #    Y_test_task = Y_test[np.isin(Y_test, current_classes)]
-            #    # Remap the class labels to be between 0 and 4 
-            #    Y_train_task_mapped = Y_train_task%5
-            #    Y_test_task_mapped = Y_test_task%5
-            #    # Append the task data
-            #    X_train_tasks.append(torch.tensor(X_train_task, dtype=torch.float32))
-            #    Y_train_tasks.append(torch.tensor(Y_train_task_mapped, dtype=torch.long))
-            #    X_test_tasks.append(torch.tensor(X_test_task, dtype=torch.float32))
-            #    Y_test_tasks.append(torch.tensor(Y_test_task_mapped, dtype=torch.long))
-               
-            # self.X_train = X_train_tasks 
-            # self.Y_train = Y_train_tasks
-            # self.X_test = X_test_tasks
-            # self.Y_test = Y_test_tasks
-         # Generate random permutation for each family   
-        
+           
     def load_ood(self,):
         if self.dataset_name == 'CIFAR10':
             # Load CIFAR100 test dataset for uncertainty measure

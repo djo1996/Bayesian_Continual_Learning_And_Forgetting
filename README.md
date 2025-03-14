@@ -25,7 +25,7 @@ The CIFAR/MNIST training datasets are too large for GitHub. You can download the
 After downloading, place them in the `datasets/` folder before running the scripts.
 
 ## Figure Animals
-This is the commands to run in order to obtain results of Figure2.
+This is the commands to run in order to obtain results of Figure 2.
 Before running the command, ensure that you create the repository where you want to store the results. Replace "YOUR_DIRECTORY" with your desired path. (Choose a different one for each simulation)
 #### MESU
 ```bash

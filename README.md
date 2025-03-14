@@ -70,25 +70,23 @@ python3 -u main.py --learning_scenario='Task incremental' --dataset="CIFAR110" -
 }
 ```
 ```bash
-python3 -u main.py \
-    --learning_scenario='Task incremental' \
-    --dataset="CIFAR110"  \
-    --algo='SI' \
-    --result_dir="$RESULT_DIR/SI" \
-    --argfile="arguments_simu.txt" \
-    --boundary="Clear" \
-    --batch_size=200 \
-    --batch_size_inf=200 \
-    --train_epochs_A=60 \
-    --train_epochs_B=60 \
-    --activation='Relu'  \
-    --reduction='mean' \
-    --random_seed=10 \
-    --num_heads=11 \
-    --num_classes=10 \
-    --lr=0.001 \
-    --lambda=5 \
-    --torch_optim_name='Adam'  
+python3 -u main.py --learning_scenario='Task incremental' --dataset="CIFAR110" --algo='SI' --result_dir="YOUR_DIRECTORY" --argfile="arguments_simu.txt" --boundary="Clear" --batch_size=200  --batch_size_inf=200 --train_epochs_A=60 --train_epochs_B=60 --activation='Relu' --reduction='mean' --random_seed=10 --num_heads=11 --num_classes=10 --lr=0.001 --c_si=0.08 --torch_optim_name='Adam' 
+```
+This is the commands to run in order to obtain results for cases where the number of splits is greater than 1—i.e., the case of an unclear boundary.
+
+All hyperparameters must remain the same as in the previous experiment. As you can see, the only change is modifying the "boundary" argument from "Clear" to "Unclear", while selecting the desired number of seasons (number of splits).
+
+```bash
+python3 -u main.py --learning_scenario='Task incremental' --dataset="CIFAR110" --algo='SI' --result_dir="YOUR_DIRECTORY" --argfile="arguments_simu.txt" --boundary="Unclear" --seasons=2 --batch_size=200 - --batch_size_inf=200 --train_epochs_A=60 --train_epochs_B=60 --activation='Relu' --reduction='mean' --random_seed=10 --num_heads=11 --num_classes=10 --lr=0.001 --c_si=0.08 --torch_optim_name='Adam' > 
+```
+```bash
+python3 -u main.py --learning_scenario='Task incremental' --dataset="CIFAR110" --algo='SI' --result_dir="YOUR_DIRECTORY" --argfile="arguments_simu.txt" --boundary="Unclear" --seasons=4 --batch_size=200 - --batch_size_inf=200 --train_epochs_A=60 --train_epochs_B=60 --activation='Relu' --reduction='mean' --random_seed=10 --num_heads=11 --num_classes=10 --lr=0.001 --c_si=0.08 --torch_optim_name='Adam' > 
+```
+```bash
+python3 -u main.py --learning_scenario='Task incremental' --dataset="CIFAR110" --algo='SI' --result_dir="YOUR_DIRECTORY" --argfile="arguments_simu.txt" --boundary="Unclear" --seasons=8 --batch_size=200 - --batch_size_inf=200 --train_epochs_A=60 --train_epochs_B=60 --activation='Relu' --reduction='mean' --random_seed=10 --num_heads=11 --num_classes=10 --lr=0.001 --c_si=0.08 --torch_optim_name='Adam' > 
+```
+```bash
+python3 -u main.py --learning_scenario='Task incremental' --dataset="CIFAR110" --algo='SI' --result_dir="YOUR_DIRECTORY" --argfile="arguments_simu.txt" --boundary="Unclear" --seasons=16 --batch_size=200 - --batch_size_inf=200 --train_epochs_A=60 --train_epochs_B=60 --activation='Relu' --reduction='mean' --random_seed=10 --num_heads=11 --num_classes=10 --lr=0.001 --c_si=0.08 --torch_optim_name='Adam' > 
 ```
 #### Baseline
 
@@ -132,6 +130,9 @@ python3 -u main.py \
     --clamp_sigma 1e-6 1 \
     --ratio_max=0.02 
 ```
+
+
+
 
 ## Authors
 

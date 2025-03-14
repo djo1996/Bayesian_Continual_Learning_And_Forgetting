@@ -12,6 +12,7 @@ import numpy as np
 from torch import autograd 
 
 
+### SOME CONFIG ARE NOT USED IN THE MAIN PAPER...
 
 def select_model_and_optim(args_dict):
     """Return the appropriate neural network model and optimizer based on the learning scenario, algorithm, and dataset."""

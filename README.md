@@ -168,7 +168,7 @@ python3 -u main.py --learning_scenario='Classic' --dataset='MNIST'  --algo='DET'
 
 ## Figure 3 and Figure 4
 
-To reproduce the results of figure 3 and 4 check out the JAX implementaion we made in this other [github](https://github.com/kellian-cottart/mesu-pmnist.git).
+To reproduce the results of Figures 3 and 4, check out our JAX implementation in this [GitHub repository](https://github.com/kellian-cottart/mesu-pmnist.git).
 
 ## Authors
 

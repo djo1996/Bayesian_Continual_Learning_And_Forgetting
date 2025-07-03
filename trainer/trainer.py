@@ -1,9 +1,15 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python3                     
 # -*- coding: utf-8 -*-
+# SPDX-License-Identifier: MIT AND BSD-3-Clause 
+#
+# Code for “Bayesian continual learning and forgetting in neural networks”
+# (arXiv:2504.13569)
+# Portions adapted from the PyTorch project (BSD-3-Clause) 
+#
+# Author: Djohan Bonnet  <djohan.bonnet@gmail.com>
+# Date: 2025-04-18
 """
-Created on Fri Aug  2 16:04:18 2024
-
-@author: djohan
+This module implements the trainer used for experiments.
 """
 import torch
 import numpy as np

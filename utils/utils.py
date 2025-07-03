@@ -1,9 +1,15 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python3                     
 # -*- coding: utf-8 -*-
+# SPDX-License-Identifier: MIT AND BSD-3-Clause 
+#
+# Code for “Bayesian continual learning and forgetting in neural networks”
+# (arXiv:2504.13569)
+# Portions adapted from the PyTorch project (BSD-3-Clause) 
+#
+# Author: Djohan Bonnet  <djohan.bonnet@gmail.com>
+# Date: 2025-04-18
 """
-Created on Fri Aug  2 17:57:18 2024
-
-@author: djohan
+This module implements utility functions.
 """
 import torch
 import models

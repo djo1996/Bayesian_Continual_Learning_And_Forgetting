@@ -1,10 +1,18 @@
+
+#!/usr/bin/env python3                     
 # -*- coding: utf-8 -*-
+# SPDX-License-Identifier: MIT AND BSD-3-Clause 
+#
+# Code for “Bayesian continual learning and forgetting in neural networks”
+# (arXiv:2504.13569)
+# Portions adapted from the PyTorch project (BSD-3-Clause) 
+#
+# Author: Djohan Bonnet  <djohan.bonnet@gmail.com>
+# Date: 2025-04-18
 """
-Created on Fri Jan 27 12:02:27 2023
-
-@author: DB262466
+This module implements Meta-Bayes layers for PyTorch, including linear and convolutional layers.
+It provides a Gaussian distribution for weights and biases, allowing for sampling during the forward pass.
 """
-
 
 import math
 import torch

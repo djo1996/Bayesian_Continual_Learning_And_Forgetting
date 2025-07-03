@@ -1,11 +1,25 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python3                     
 # -*- coding: utf-8 -*-
-"""
-Created on Fri Aug  2 17:59:47 2024
+# SPDX-License-Identifier: MIT AND BSD-3-Clause 
+#
+# Code for “Bayesian continual learning and forgetting in neural networks”
+# (arXiv:2504.13569)
+# Portions adapted from the PyTorch project (BSD-3-Clause) 
+#
+# Author: Djohan Bonnet  <djohan.bonnet@gmail.com>
+# Date: 2025-04-18
 
-@author: djohan
 """
+Main script for running experiments from:
+“Bayesian continual learning and forgetting in neural networks” (arXiv:2504.13569)
 
+Features:
+- Parses experiment arguments from the command line
+- Sets up data loaders and models
+- Trains Bayesian and deterministic networks
+- Evaluates performance and saves results
+- Reproduces results for specific figures in the paper
+"""
 import os
 import argparse
 from tqdm import tqdm

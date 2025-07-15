@@ -72,7 +72,7 @@ This is the commands to run in order to obtain results for clear task boundary.
 This corresponds to the case where the number of splits is 1, as shown in Figure 5. This experiment was conducted to determine the optimal hyperparameters for each algorithm.
 
 Before running the command, ensure that you create the repository where you want to store the results. Replace "YOUR_DIRECTORY" with your desired path. (Choose a different one for each simulation)
-The run time should be respectively around 20min.
+The run time should be around 20min.
 
 ### MESU
 ```bash

@@ -45,7 +45,7 @@ pip install tqdm
 pip install matplotlib
 pip install python-mnist
 ```
-
+It should last few minutes.
 ## Dataset Download
 
 The CIFAR/MNIST training datasets are too large for GitHub. You can download them here:

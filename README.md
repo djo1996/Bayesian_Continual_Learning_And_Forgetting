@@ -25,10 +25,10 @@ MESU is a Bayesian framework that balances learning and forgetting by leveraging
     - python-mnist
 
 - **Versions Tested:**  
-    - Python 3.10.12
-    - torch ≥ 2.0
-    - torchvision ≥ 0.15
-    - torchaudio ≥ 2.0
+    - Python 3.12.3
+    - torch  2.6.0+cu118
+    - torchaudio 2.6.0+cu118
+    - torchvision 0.21.0+cu118
 
 ---
 

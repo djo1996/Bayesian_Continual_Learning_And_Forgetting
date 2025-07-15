@@ -2,7 +2,37 @@
 
 MESU is a Bayesian framework that balances learning and forgetting by leveraging synaptic uncertainty, enabling continual learning without task boundaries while mitigating catastrophic forgetting, and catastrophic remembering.
 
-## Get Started
+
+## 1. System Requirements
+
+- **Operating System:**  
+    - Ubuntu 24.04.2 LTS (Noble Numbat)
+
+- **Programming Language:**  
+    - Python 3.x (tested on Python 3.10)
+
+- **Hardware Requirements:**  
+    - Recommended: NVIDIA GPU for acceleration  
+    - Tested on: NVIDIA GeForce RTX 3090 (CUDA 12.6, 24GB VRAM)  
+    - Also runs on CPU (slower)
+
+- **Software Dependencies:**  
+    - torch (tested with CUDA 11.8 and CUDA 12.6)
+    - torchvision
+    - torchaudio
+    - tqdm
+    - matplotlib
+    - python-mnist
+
+- **Versions Tested:**  
+    - Python 3.10.12
+    - torch ≥ 2.0
+    - torchvision ≥ 0.15
+    - torchaudio ≥ 2.0
+
+---
+
+## 2. Installation Guide
 
 To set up your environment, run the following commands:
 
